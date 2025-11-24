@@ -44,10 +44,22 @@ export interface CreditLogEntry {
  */
 export class FactionMembersResource extends BaseResource {
   /**
-   * List faction members
+   * List faction members (paginated)
+   * @param options - Faction ID and optional pagination parameters
+   * @example
+   * const members = await client.faction.members.list({ factionId: '20:123' });
+   * const moreMembers = await client.faction.members.list({ factionId: '20:123', start_index: 51, item_count: 50 });
    */
-  async list(options: { factionId: string }): Promise<FactionMember[]> {
-    return this.request<FactionMember[]>('GET', `/faction/${options.factionId}/members`);
+  async list(options: {
+    factionId: string;
+    start_index?: number;
+    item_count?: number;
+  }): Promise<FactionMember[]> {
+    const params = {
+      start_index: options.start_index || 1,
+      item_count: options.item_count || 50,
+    };
+    return this.http.get<FactionMember[]>(`/faction/${options.factionId}/members`, { params });
   }
 
   /**
@@ -70,10 +82,22 @@ export class FactionMembersResource extends BaseResource {
  */
 export class FactionBudgetsResource extends BaseResource {
   /**
-   * List faction budgets
+   * List faction budgets (paginated)
+   * @param options - Faction ID and optional pagination parameters
+   * @example
+   * const budgets = await client.faction.budgets.list({ factionId: '20:123' });
+   * const moreBudgets = await client.faction.budgets.list({ factionId: '20:123', start_index: 51, item_count: 50 });
    */
-  async list(options: { factionId: string }): Promise<Budget[]> {
-    return this.request<Budget[]>('GET', `/faction/${options.factionId}/budgets`);
+  async list(options: {
+    factionId: string;
+    start_index?: number;
+    item_count?: number;
+  }): Promise<Budget[]> {
+    const params = {
+      start_index: options.start_index || 1,
+      item_count: options.item_count || 50,
+    };
+    return this.http.get<Budget[]>(`/faction/${options.factionId}/budgets`, { params });
   }
 
   /**
@@ -89,10 +113,22 @@ export class FactionBudgetsResource extends BaseResource {
  */
 export class FactionStockholdersResource extends BaseResource {
   /**
-   * List faction stockholders
+   * List faction stockholders (paginated)
+   * @param options - Faction ID and optional pagination parameters
+   * @example
+   * const stockholders = await client.faction.stockholders.list({ factionId: '20:123' });
+   * const moreStockholders = await client.faction.stockholders.list({ factionId: '20:123', start_index: 51, item_count: 50 });
    */
-  async list(options: { factionId: string }): Promise<Stockholder[]> {
-    return this.request<Stockholder[]>('GET', `/faction/${options.factionId}/stockholders`);
+  async list(options: {
+    factionId: string;
+    start_index?: number;
+    item_count?: number;
+  }): Promise<Stockholder[]> {
+    const params = {
+      start_index: options.start_index || 1,
+      item_count: options.item_count || 50,
+    };
+    return this.http.get<Stockholder[]>(`/faction/${options.factionId}/stockholders`, { params });
   }
 }
 
@@ -127,10 +163,27 @@ export class FactionCreditsResource extends BaseResource {
  */
 export class FactionCreditlogResource extends BaseResource {
   /**
-   * Get faction credit log
+   * Get faction credit log (paginated)
+   * @param options - Faction ID and optional pagination/filtering parameters
+   * @example
+   * const creditlog = await client.faction.creditlog.list({ factionId: '20:123' });
+   * const moreLogs = await client.faction.creditlog.list({ factionId: '20:123', start_index: 51, item_count: 100 });
+   * const oldestLogs = await client.faction.creditlog.list({ factionId: '20:123', start_id: 1 });
    */
-  async list(options: { factionId: string }): Promise<CreditLogEntry[]> {
-    return this.request<CreditLogEntry[]>('GET', `/faction/${options.factionId}/creditlog`);
+  async list(options: {
+    factionId: string;
+    start_index?: number;
+    item_count?: number;
+    start_id?: number;
+  }): Promise<CreditLogEntry[]> {
+    const params: Record<string, number> = {
+      start_index: options.start_index || 1,
+      item_count: options.item_count || 50,
+    };
+    if (options.start_id !== undefined) {
+      params.start_id = options.start_id;
+    }
+    return this.http.get<CreditLogEntry[]>(`/faction/${options.factionId}/creditlog`, { params });
   }
 }
 
@@ -161,9 +214,17 @@ export class FactionResource extends BaseResource {
   }
 
   /**
-   * List all factions
+   * List all factions (paginated)
+   * @param options - Optional pagination parameters
+   * @example
+   * const factions = await client.faction.list();
+   * const moreFactions = await client.faction.list({ start_index: 51, item_count: 50 });
    */
-  async list(): Promise<Faction[]> {
-    return this.request<Faction[]>('GET', '/factions');
+  async list(options?: { start_index?: number; item_count?: number }): Promise<Faction[]> {
+    const params = {
+      start_index: options?.start_index || 1,
+      item_count: options?.item_count || 50,
+    };
+    return this.http.get<Faction[]>('/factions', { params });
   }
 }

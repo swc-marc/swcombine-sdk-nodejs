@@ -249,6 +249,8 @@ export interface GetCharacterByHandleOptions {
 export interface ListMessagesOptions {
   uid: string;
   mode: MessageMode;
+  start_index?: number;
+  item_count?: number;
 }
 
 export interface GetMessageOptions {
@@ -282,6 +284,9 @@ export interface GetCharacterCreditsOptions {
 
 export interface GetCharacterCreditlogOptions {
   uid: string;
+  start_index?: number;
+  item_count?: number;
+  start_id?: number;
 }
 
 export interface GetCharacterPermissionsOptions {

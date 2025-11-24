@@ -21,10 +21,18 @@ import {
  */
 export class GalaxyPlanetsResource extends BaseResource {
   /**
-   * List all planets
+   * List all planets (paginated)
+   * @param options - Optional pagination parameters
+   * @example
+   * const planets = await client.galaxy.planets.list();
+   * const morePlanets = await client.galaxy.planets.list({ start_index: 51, item_count: 50 });
    */
-  async list(): Promise<Planet[]> {
-    return this.request<Planet[]>('GET', '/galaxy/planets');
+  async list(options?: { start_index?: number; item_count?: number }): Promise<Planet[]> {
+    const params = {
+      start_index: options?.start_index || 1,
+      item_count: options?.item_count || 50,
+    };
+    return this.http.get<Planet[]>('/galaxy/planets/', { params });
   }
 
   /**
@@ -40,14 +48,25 @@ export class GalaxyPlanetsResource extends BaseResource {
  */
 export class GalaxySectorsResource extends BaseResource {
   /**
-   * List all sectors
+   * List all sectors (paginated)
+   * @param options - Optional pagination parameters
+   * @example
+   * const sectors = await client.galaxy.sectors.list();
+   * const moreSectors = await client.galaxy.sectors.list({ start_index: 51, item_count: 50 });
    */
-  async list(): Promise<Sector[]> {
-    return this.request<Sector[]>('GET', '/galaxy/sectors');
+  async list(options?: { start_index?: number; item_count?: number }): Promise<Sector[]> {
+    const params = {
+      start_index: options?.start_index || 1,
+      item_count: options?.item_count || 50,
+    };
+    return this.http.get<Sector[]>('/galaxy/sectors/', { params });
   }
 
   /**
-   * Get sector by UID
+   * Get sector by name or UID
+   * @param options - Sector identifier (use lowercase sector name, e.g., 'seswenna')
+   * @example
+   * const sector = await client.galaxy.sectors.get({ uid: 'seswenna' });
    */
   async get(options: GetSectorOptions): Promise<Sector> {
     return this.request<Sector>('GET', `/galaxy/sectors/${options.uid}`);
@@ -59,10 +78,18 @@ export class GalaxySectorsResource extends BaseResource {
  */
 export class GalaxySystemsResource extends BaseResource {
   /**
-   * List all systems
+   * List all systems (paginated)
+   * @param options - Optional pagination parameters
+   * @example
+   * const systems = await client.galaxy.systems.list();
+   * const moreSystems = await client.galaxy.systems.list({ start_index: 51, item_count: 50 });
    */
-  async list(): Promise<System[]> {
-    return this.request<System[]>('GET', '/galaxy/systems');
+  async list(options?: { start_index?: number; item_count?: number }): Promise<System[]> {
+    const params = {
+      start_index: options?.start_index || 1,
+      item_count: options?.item_count || 50,
+    };
+    return this.http.get<System[]>('/galaxy/systems/', { params });
   }
 
   /**
@@ -78,10 +105,18 @@ export class GalaxySystemsResource extends BaseResource {
  */
 export class GalaxyStationsResource extends BaseResource {
   /**
-   * List all stations in named systems with no ECM
+   * List all stations in named systems with no ECM (paginated)
+   * @param options - Optional pagination parameters
+   * @example
+   * const stations = await client.galaxy.stations.list();
+   * const moreStations = await client.galaxy.stations.list({ start_index: 51, item_count: 50 });
    */
-  async list(): Promise<Station[]> {
-    return this.request<Station[]>('GET', '/galaxy/stations');
+  async list(options?: { start_index?: number; item_count?: number }): Promise<Station[]> {
+    const params = {
+      start_index: options?.start_index || 1,
+      item_count: options?.item_count || 50,
+    };
+    return this.http.get<Station[]>('/galaxy/stations/', { params });
   }
 
   /**
@@ -97,10 +132,18 @@ export class GalaxyStationsResource extends BaseResource {
  */
 export class GalaxyCitiesResource extends BaseResource {
   /**
-   * List all cities
+   * List all cities (paginated)
+   * @param options - Optional pagination parameters
+   * @example
+   * const cities = await client.galaxy.cities.list();
+   * const moreCities = await client.galaxy.cities.list({ start_index: 51, item_count: 50 });
    */
-  async list(): Promise<City[]> {
-    return this.request<City[]>('GET', '/galaxy/cities');
+  async list(options?: { start_index?: number; item_count?: number }): Promise<City[]> {
+    const params = {
+      start_index: options?.start_index || 1,
+      item_count: options?.item_count || 50,
+    };
+    return this.http.get<City[]>('/galaxy/cities/', { params });
   }
 
   /**
@@ -128,5 +171,39 @@ export class GalaxyResource extends BaseResource {
     this.systems = new GalaxySystemsResource(http);
     this.stations = new GalaxyStationsResource(http);
     this.cities = new GalaxyCitiesResource(http);
+  }
+
+  /**
+   * Extract unique sectors from systems list
+   * This is a helper method since the API doesn't provide a direct sectors list endpoint
+   * @returns Array of unique sector information extracted from systems
+   * @example
+   * const sectorsData = await client.galaxy.getSectorsFromSystems();
+   * // Returns: [{ uid: '25:160', name: 'Seswenna', href: '...' }, ...]
+   */
+  async getSectorsFromSystems(): Promise<Array<{ uid: string; name: string; href?: string }>> {
+    const systemsResponse = await this.systems.list();
+
+    // Handle paginated response
+    const systems = (systemsResponse as any).system || systemsResponse;
+
+    // Extract unique sectors
+    const sectorMap = new Map<string, { uid: string; name: string; href?: string }>();
+
+    for (const system of systems) {
+      const sector = system.location?.container;
+      if (sector?.attributes?.uid && sector.attributes.type === 'sector') {
+        const uid = sector.attributes.uid;
+        if (!sectorMap.has(uid)) {
+          sectorMap.set(uid, {
+            uid: uid,
+            name: sector.value,
+            href: sector.attributes.href,
+          });
+        }
+      }
+    }
+
+    return Array.from(sectorMap.values());
   }
 }

@@ -45,10 +45,18 @@ export interface CreditLogEntry {
  */
 export class CharacterMessagesResource extends BaseResource {
   /**
-   * List messages sent or received by character
+   * List messages sent or received by character (paginated)
+   * @param options - Character UID, message mode, and optional pagination parameters
+   * @example
+   * const messages = await client.character.messages.list({ uid: '1:12345', mode: 'received' });
+   * const moreMessages = await client.character.messages.list({ uid: '1:12345', mode: 'received', start_index: 51, item_count: 50 });
    */
   async list(options: ListMessagesOptions): Promise<Message[]> {
-    return this.request<Message[]>('GET', `/character/${options.uid}/messages/${options.mode}`);
+    const params: Record<string, number> = {
+      start_index: options.start_index || 1,
+      item_count: options.item_count || 50,
+    };
+    return this.http.get<Message[]>(`/character/${options.uid}/messages/${options.mode}`, { params });
   }
 
   /**
@@ -158,10 +166,22 @@ export class CharacterCreditsResource extends BaseResource {
  */
 export class CharacterCreditlogResource extends BaseResource {
   /**
-   * Get character's credit log
+   * Get character's credit log (paginated)
+   * @param options - Character UID and optional pagination/filtering parameters
+   * @example
+   * const creditlog = await client.character.creditlog.list({ uid: '1:12345' });
+   * const moreLogs = await client.character.creditlog.list({ uid: '1:12345', start_index: 51, item_count: 100 });
+   * const oldestLogs = await client.character.creditlog.list({ uid: '1:12345', start_id: 1 });
    */
   async list(options: GetCharacterCreditlogOptions): Promise<CreditLogEntry[]> {
-    return this.request<CreditLogEntry[]>('GET', `/character/${options.uid}/creditlog`);
+    const params: Record<string, number> = {
+      start_index: options.start_index || 1,
+      item_count: options.item_count || 50,
+    };
+    if (options.start_id !== undefined) {
+      params.start_id = options.start_id;
+    }
+    return this.http.get<CreditLogEntry[]>(`/character/${options.uid}/creditlog`, { params });
   }
 }
 
