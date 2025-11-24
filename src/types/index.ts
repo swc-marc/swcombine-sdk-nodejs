@@ -340,6 +340,14 @@ export interface GetNewsItemOptions {
 
 export interface ListNewsOptions {
   category?: string;
+  start_index?: number;
+  item_count?: number;
+  start_date?: number;
+  end_date?: number;
+  search?: string;
+  author?: string;
+  faction?: string;
+  faction_type?: string;
 }
 
 export interface GetEntityOptions {
@@ -351,4 +359,9 @@ export interface ListInventoryEntitiesOptions {
   uid: string;
   entityType: string;
   assignType: string;
+  start_index?: number;
+  item_count?: number;
+  filter_type?: string[];
+  filter_value?: string[];
+  filter_inclusion?: ('includes' | 'excludes')[];
 }

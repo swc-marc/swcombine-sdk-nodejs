@@ -34,13 +34,29 @@ export class TypesClassesResource extends BaseResource {
  */
 export class TypesEntitiesResource extends BaseResource {
   /**
-   * Get all entities of a type
+   * Get all entities of a type (paginated)
+   * @param options - Entity type, optional class filter, and optional pagination parameters
+   * @example
+   * const ships = await client.types.entities.list({ entityType: 'ships' });
+   * const moreShips = await client.types.entities.list({ entityType: 'ships', start_index: 51, item_count: 50 });
+   * const fighters = await client.types.entities.list({ entityType: 'ships', class: 'fighter', start_index: 1, item_count: 50 });
    */
-  async list(options: { entityType: string; class?: string }): Promise<Entity[]> {
+  async list(options: {
+    entityType: string;
+    class?: string;
+    start_index?: number;
+    item_count?: number;
+  }): Promise<Entity[]> {
     const path = options.class
       ? `/types/${options.entityType}/class/${options.class}`
       : `/types/${options.entityType}`;
-    return this.request<Entity[]>('GET', path);
+
+    const params = {
+      start_index: options.start_index || 1,
+      item_count: options.item_count || 50,
+    };
+
+    return this.http.get<Entity[]>(path, { params });
   }
 
   /**

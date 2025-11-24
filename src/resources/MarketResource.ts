@@ -10,10 +10,18 @@ import { Vendor, GetVendorOptions } from '../types/index.js';
  */
 export class MarketVendorsResource extends BaseResource {
   /**
-   * List all public vendors
+   * List all public vendors (paginated)
+   * @param options - Optional pagination parameters
+   * @example
+   * const vendors = await client.market.vendors.list();
+   * const moreVendors = await client.market.vendors.list({ start_index: 51, item_count: 50 });
    */
-  async list(): Promise<Vendor[]> {
-    return this.request<Vendor[]>('GET', '/market/vendors');
+  async list(options?: { start_index?: number; item_count?: number }): Promise<Vendor[]> {
+    const params = {
+      start_index: options?.start_index || 1,
+      item_count: options?.item_count || 50,
+    };
+    return this.http.get<Vendor[]>('/market/vendors', { params });
   }
 
   /**

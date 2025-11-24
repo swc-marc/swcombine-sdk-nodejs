@@ -10,12 +10,40 @@ import { Entity, GetEntityOptions, ListInventoryEntitiesOptions } from '../types
  */
 export class InventoryEntitiesResource extends BaseResource {
   /**
-   * List entities in inventory
+   * List entities in inventory (paginated with optional filtering)
+   * @param options - Inventory UID, entity type, assign type, and optional pagination/filtering parameters
+   * @example
+   * const entities = await client.inventory.entities.list({ uid: '1:12345', entityType: 'vehicle', assignType: 'pilot' });
+   * const moreEntities = await client.inventory.entities.list({ uid: '1:12345', entityType: 'vehicle', assignType: 'pilot', start_index: 51, item_count: 100 });
+   * const filteredEntities = await client.inventory.entities.list({
+   *   uid: '1:12345',
+   *   entityType: 'vehicle',
+   *   assignType: 'pilot',
+   *   filter_type: ['hp'],
+   *   filter_value: ['100'],
+   *   filter_inclusion: ['includes']
+   * });
    */
   async list(options: ListInventoryEntitiesOptions): Promise<Entity[]> {
-    return this.request<Entity[]>(
-      'GET',
-      `/inventory/${options.uid}/${options.entityType}/${options.assignType}`
+    const params: Record<string, any> = {
+      start_index: options.start_index || 1,
+      item_count: options.item_count || 50,
+    };
+
+    // Add filtering parameters if provided
+    if (options.filter_type) {
+      params.filter_type = options.filter_type;
+    }
+    if (options.filter_value) {
+      params.filter_value = options.filter_value;
+    }
+    if (options.filter_inclusion) {
+      params.filter_inclusion = options.filter_inclusion;
+    }
+
+    return this.http.get<Entity[]>(
+      `/inventory/${options.uid}/${options.entityType}/${options.assignType}`,
+      { params }
     );
   }
 
