@@ -2,8 +2,9 @@
  * News resource for accessing news feeds
  */
 
+import { HttpClient } from '../http/HttpClient.js';
 import { BaseResource } from './BaseResource.js';
-import { NewsItem, GetNewsItemOptions, ListNewsOptions } from '../types/index.js';
+import { NewsItem, GetNewsItemOptions, ListNewsOptions, QueryParams } from '../types/index.js';
 
 /**
  * Galactic News Service (GNS) resource
@@ -22,7 +23,7 @@ export class GNSResource extends BaseResource {
   async list(options?: ListNewsOptions): Promise<NewsItem[]> {
     const path = options?.category ? `/news/gns/${options.category}` : '/news/gns';
 
-    const params: Record<string, any> = {
+    const params: QueryParams = {
       start_index: options?.start_index || 1,
       item_count: options?.item_count || 50,
     };
@@ -73,7 +74,7 @@ export class SimNewsResource extends BaseResource {
   async list(options?: ListNewsOptions): Promise<NewsItem[]> {
     const path = options?.category ? `/news/simnews/${options.category}` : '/news/simnews';
 
-    const params: Record<string, any> = {
+    const params: QueryParams = {
       start_index: options?.start_index || 1,
       item_count: options?.item_count || 50,
     };
@@ -110,7 +111,7 @@ export class NewsResource extends BaseResource {
   public readonly gns: GNSResource;
   public readonly simNews: SimNewsResource;
 
-  constructor(http: any) {
+  constructor(http: HttpClient) {
     super(http);
     this.gns = new GNSResource(http);
     this.simNews = new SimNewsResource(http);

@@ -6,19 +6,19 @@ import { BaseResource } from './BaseResource.js';
 
 export interface HelloWorldResponse {
   message: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface HelloAuthResponse {
   message: string;
   character?: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface Permission {
   name: string;
   description?: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface RateLimitInfo {
@@ -26,13 +26,13 @@ export interface RateLimitInfo {
   remaining: number;
   reset: number;
   resetTime: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface TimeResponse {
   currentTime: string;
   timestamp: number;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 /**

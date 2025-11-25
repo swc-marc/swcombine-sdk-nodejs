@@ -3,7 +3,7 @@
  */
 
 import { BaseResource } from './BaseResource.js';
-import { Event } from '../types/index.js';
+import { Event, QueryParams } from '../types/index.js';
 
 /**
  * Events resource for querying events
@@ -26,7 +26,7 @@ export class EventsResource extends BaseResource {
     start_time?: number;
     faction_id?: string;
   }): Promise<Event[]> {
-    const params: Record<string, any> = {
+    const params: QueryParams = {
       start_index: options.start_index !== undefined ? options.start_index : 0, // 0-based indexing!
       item_count: options.item_count || 50,
     };

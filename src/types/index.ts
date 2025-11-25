@@ -3,6 +3,16 @@
  */
 
 // ============================================================================
+// Utility Types
+// ============================================================================
+
+/**
+ * Type for query parameters (for pagination, filtering, etc.)
+ * Supports primitive values and arrays for filtering
+ */
+export type QueryParams = Record<string, string | number | boolean | string[] | number[] | undefined>;
+
+// ============================================================================
 // Enums
 // ============================================================================
 
@@ -102,7 +112,7 @@ export interface Character {
   faction?: Faction | string;
   credits?: number;
   location?: Location;
-  [key: string]: any; // Allow for unknown fields
+  [key: string]: unknown; // Allow for unknown fields
 }
 
 export interface Faction {
@@ -110,7 +120,7 @@ export interface Faction {
   name: string;
   type?: string;
   owner?: Character | string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface Message {
@@ -121,7 +131,7 @@ export interface Message {
   timestamp: string;
   read: boolean;
   body?: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface Skill {
@@ -129,7 +139,7 @@ export interface Skill {
   name: string;
   level: number;
   experience?: number;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface Planet {
@@ -139,34 +149,34 @@ export interface Planet {
   system?: System | string;
   size?: string;
   terrain?: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface Sector {
   uid: string;
   name: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface System {
   uid: string;
   name: string;
   sector?: Sector | string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface Station {
   uid: string;
   name: string;
   system?: System | string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface City {
   uid: string;
   name: string;
   planet?: Planet | string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface Location {
@@ -176,7 +186,7 @@ export interface Location {
   system?: System | string;
   planet?: Planet | string;
   city?: City | string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface Entity {
@@ -184,7 +194,7 @@ export interface Entity {
   type: string;
   name?: string;
   owner?: Character | Faction | string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface Vendor {
@@ -192,7 +202,7 @@ export interface Vendor {
   name: string;
   owner?: Character | Faction | string;
   location?: Location;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface NewsItem {
@@ -201,7 +211,7 @@ export interface NewsItem {
   category?: string;
   timestamp: string;
   content?: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface Event {
@@ -209,7 +219,7 @@ export interface Event {
   type: string;
   timestamp: string;
   description?: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 // ============================================================================
@@ -231,7 +241,7 @@ export interface APIErrorResponse {
   error: string;
   error_description?: string;
   message?: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 // ============================================================================

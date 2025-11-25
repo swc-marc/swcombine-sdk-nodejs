@@ -50,28 +50,6 @@ export const MessageScopes = {
 } as const;
 
 /**
- * Personal inventory entity types
- */
-const PersonalInventoryTypes = [
-  'SHIPS',
-  'VEHICLES',
-  'STATIONS',
-  'CITIES',
-  'FACILITIES',
-  'PLANETS',
-  'ITEMS',
-  'NPCS',
-  'DROIDS',
-  'MATERIALS',
-  'CREATURES',
-] as const;
-
-/**
- * Personal inventory permission types
- */
-const InventoryPermissions = ['READ', 'RENAME', 'ASSIGN', 'MAKEOVER', 'TAGS_READ', 'TAGS_WRITE', 'ALL'] as const;
-
-/**
  * Generate personal inventory scopes for a specific entity type
  */
 function generatePersonalInventoryScopes(entityType: string, hasRename: boolean = true) {

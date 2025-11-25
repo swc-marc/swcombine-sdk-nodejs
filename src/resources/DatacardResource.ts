@@ -8,7 +8,7 @@ export interface Datacard {
   uid: string;
   name?: string;
   description?: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 /**

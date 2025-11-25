@@ -17,7 +17,7 @@ export abstract class BaseResource {
   /**
    * Make a request to the API
    */
-  protected async request<T>(method: string, path: string, data?: any): Promise<T> {
+  protected async request<T>(method: string, path: string, data?: unknown): Promise<T> {
     switch (method.toUpperCase()) {
       case 'GET':
         return this.http.get<T>(path);

@@ -2,8 +2,9 @@
  * Inventory resource for managing entities
  */
 
+import { HttpClient } from '../http/HttpClient.js';
 import { BaseResource } from './BaseResource.js';
-import { Entity, GetEntityOptions, ListInventoryEntitiesOptions } from '../types/index.js';
+import { Entity, GetEntityOptions, ListInventoryEntitiesOptions, QueryParams } from '../types/index.js';
 
 /**
  * Inventory entities resource
@@ -25,7 +26,7 @@ export class InventoryEntitiesResource extends BaseResource {
    * });
    */
   async list(options: ListInventoryEntitiesOptions): Promise<Entity[]> {
-    const params: Record<string, any> = {
+    const params: QueryParams = {
       start_index: options.start_index || 1,
       item_count: options.item_count || 50,
     };
@@ -107,7 +108,7 @@ export class InventoryEntitiesResource extends BaseResource {
 export class InventoryResource extends BaseResource {
   public readonly entities: InventoryEntitiesResource;
 
-  constructor(http: any) {
+  constructor(http: HttpClient) {
     super(http);
     this.entities = new InventoryEntitiesResource(http);
   }

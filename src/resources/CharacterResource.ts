@@ -2,6 +2,7 @@
  * Character resource for accessing character data
  */
 
+import { HttpClient } from '../http/HttpClient.js';
 import { BaseResource } from './BaseResource.js';
 import {
   Character,
@@ -18,18 +19,17 @@ import {
   GetCharacterCreditsOptions,
   GetCharacterCreditlogOptions,
   GetCharacterPermissionsOptions,
-  MessageMode,
 } from '../types/index.js';
 
 export interface Privilege {
   name: string;
   granted: boolean;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface Credits {
   amount: number;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface CreditLogEntry {
@@ -37,7 +37,7 @@ export interface CreditLogEntry {
   amount: number;
   balance: number;
   description?: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 /**
@@ -208,7 +208,7 @@ export class CharacterResource extends BaseResource {
   public readonly creditlog: CharacterCreditlogResource;
   public readonly permissions: CharacterPermissionsResource;
 
-  constructor(http: any) {
+  constructor(http: HttpClient) {
     super(http);
     this.messages = new CharacterMessagesResource(http);
     this.skills = new CharacterSkillsResource(http);

@@ -2,6 +2,7 @@
  * Market resource for accessing vendor data
  */
 
+import { HttpClient } from '../http/HttpClient.js';
 import { BaseResource } from './BaseResource.js';
 import { Vendor, GetVendorOptions } from '../types/index.js';
 
@@ -38,7 +39,7 @@ export class MarketVendorsResource extends BaseResource {
 export class MarketResource extends BaseResource {
   public readonly vendors: MarketVendorsResource;
 
-  constructor(http: any) {
+  constructor(http: HttpClient) {
     super(http);
     this.vendors = new MarketVendorsResource(http);
   }

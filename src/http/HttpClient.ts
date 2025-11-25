@@ -5,12 +5,10 @@
 import axios, {
   AxiosInstance,
   AxiosRequestConfig,
-  AxiosResponse,
   AxiosError,
   InternalAxiosRequestConfig,
 } from 'axios';
 import { SWCError } from './errors.js';
-import { ClientConfig } from '../types/index.js';
 import type { TokenManager } from '../auth/TokenManager.js';
 
 export interface HttpClientOptions {

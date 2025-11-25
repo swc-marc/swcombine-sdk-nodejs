@@ -2,6 +2,7 @@
  * Faction resource for accessing faction data
  */
 
+import { HttpClient } from '../http/HttpClient.js';
 import { BaseResource } from './BaseResource.js';
 import { Faction, Character, GetFactionOptions } from '../types/index.js';
 
@@ -9,26 +10,26 @@ export interface FactionMember {
   character: Character | string;
   rank?: string;
   joinDate?: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface Budget {
   uid: string;
   name: string;
   amount: number;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface Stockholder {
   character: Character | string;
   shares: number;
   percentage: number;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface FactionCredits {
   amount: number;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface CreditLogEntry {
@@ -36,7 +37,7 @@ export interface CreditLogEntry {
   amount: number;
   balance: number;
   description?: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 /**
@@ -197,7 +198,7 @@ export class FactionResource extends BaseResource {
   public readonly credits: FactionCreditsResource;
   public readonly creditlog: FactionCreditlogResource;
 
-  constructor(http: any) {
+  constructor(http: HttpClient) {
     super(http);
     this.members = new FactionMembersResource(http);
     this.budgets = new FactionBudgetsResource(http);

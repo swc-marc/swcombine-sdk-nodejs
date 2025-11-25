@@ -2,6 +2,7 @@
  * Galaxy resource for accessing galactic data
  */
 
+import { HttpClient } from '../http/HttpClient.js';
 import { BaseResource } from './BaseResource.js';
 import {
   Planet,
@@ -164,7 +165,7 @@ export class GalaxyResource extends BaseResource {
   public readonly stations: GalaxyStationsResource;
   public readonly cities: GalaxyCitiesResource;
 
-  constructor(http: any) {
+  constructor(http: HttpClient) {
     super(http);
     this.planets = new GalaxyPlanetsResource(http);
     this.sectors = new GalaxySectorsResource(http);
