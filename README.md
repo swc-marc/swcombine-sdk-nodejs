@@ -379,7 +379,7 @@ npm run format
 
 ## License
 
-MIT © [Your Name]
+MIT © Dreks Selmur aka JonMarkGo
 
 ## Contributing
 
