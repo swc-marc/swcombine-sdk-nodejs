@@ -23,7 +23,7 @@ export interface EntityClass {
  */
 export class TypesClassesResource extends BaseResource {
   /**
-   * Get all classes for an entity type (paginated)
+   * Get all classes for a specific entity type (paginated)
    *
    * NOTE: Official API documentation states "Query String: N/A" and "Parameters: N/A",
    * but empirical testing suggests pagination parameters may be required to avoid 404 errors.

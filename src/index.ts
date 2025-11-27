@@ -12,10 +12,7 @@ export { SWCError } from './http/errors.js';
 // Types
 export * from './types/index.js';
 
-// OAuth permissions
-export * from './auth/permissions.js';
-
-// OAuth scopes
+// OAuth scopes (type-safe, lowercase values as required by the API)
 export {
   Scopes,
   CharacterScopes,

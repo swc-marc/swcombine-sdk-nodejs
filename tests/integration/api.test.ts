@@ -52,9 +52,14 @@ describe('API Resource Integration Tests', () => {
     saveResponse('api-permissions', response);
 
     expect(response).toBeDefined();
-    expect(typeof response).toBe('object');
-    // Permissions returns a list of available permissions
-    expectFields(response, ['permission']);
+    // Permissions returns an unwrapped array of Permission objects
+    expect(Array.isArray(response)).toBe(true);
+    expect(response.length).toBeGreaterThan(0);
+    // Each permission has an attributes object with name, description, inherits
+    const firstPerm = response[0];
+    expect(firstPerm).toHaveProperty('attributes');
+    expect(firstPerm.attributes).toHaveProperty('name');
+    expect(firstPerm.attributes).toHaveProperty('description');
   });
 
   it('should get rate limit status', async () => {

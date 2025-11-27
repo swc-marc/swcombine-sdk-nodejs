@@ -234,6 +234,25 @@ export interface ListResponse<T> {
 }
 
 // ============================================================================
+// Rate Limit Types
+// ============================================================================
+
+/**
+ * Rate limit information returned from API responses.
+ * The SW Combine API has a default limit of 600 requests per hour.
+ */
+export interface RateLimitInfo {
+  /** Maximum requests allowed per hour (typically 600) */
+  limit: number;
+  /** Requests remaining in current window */
+  remaining: number;
+  /** Unix timestamp when the rate limit resets */
+  reset: number;
+  /** Human-readable reset time string */
+  resetTime: string;
+}
+
+// ============================================================================
 // API Error Response
 // ============================================================================
 
@@ -279,8 +298,7 @@ export type InventoryFilterType =
   | 'working'
   | 'level'
   | 'race'
-  | 'tags'
-  | 'hp';
+  | 'tags';
 
 /**
  * Filter inclusion mode for inventory queries.
@@ -301,7 +319,8 @@ export interface GetCharacterByHandleOptions {
 
 export interface ListMessagesOptions {
   uid: string;
-  mode: MessageMode;
+  /** Message mode: 'sent' or 'received'. If omitted, returns both sent and received messages. */
+  mode?: MessageMode;
   start_index?: number;
   item_count?: number;
 }
@@ -351,7 +370,8 @@ export interface GetCharacterPermissionsOptions {
 }
 
 export interface GetFactionOptions {
-  uid: string;
+  /** Faction UID. If omitted, defaults to the authenticated user's primary faction. */
+  uid?: string;
 }
 
 export interface ListFactionMembersOptions {
@@ -395,17 +415,48 @@ export interface GetNewsItemOptions {
   id: string;
 }
 
-export interface ListNewsOptions {
+/**
+ * Base news listing options (shared between GNS and SimNews)
+ */
+export interface ListNewsOptionsBase {
+  /** News category to filter by */
   category?: string;
+  /** Starting position (1-based). Default: 1 */
   start_index?: number;
+  /** Number of items to retrieve. Default: 50, Max: 50 */
   item_count?: number;
+  /** Filter news starting from this Unix timestamp */
   start_date?: number;
+  /** Filter news up to this Unix timestamp */
   end_date?: number;
+  /** Search term to filter by */
   search?: string;
+  /** Author name to filter by */
   author?: string;
+}
+
+/**
+ * GNS (Galactic News Service) listing options
+ * Extends base options with GNS-specific faction filtering
+ */
+export interface ListGNSOptions extends ListNewsOptionsBase {
+  /** Faction name to filter by (GNS only) */
   faction?: string;
+  /** Faction type to filter by (GNS only) */
   faction_type?: string;
 }
+
+/**
+ * SimNews listing options
+ * Uses only base options (no faction filtering)
+ */
+export interface ListSimNewsOptions extends ListNewsOptionsBase {}
+
+/**
+ * @deprecated Use ListGNSOptions or ListSimNewsOptions instead.
+ * This combined type is kept for backwards compatibility.
+ */
+export interface ListNewsOptions extends ListGNSOptions {}
 
 export interface GetEntityOptions {
   entityType: string;

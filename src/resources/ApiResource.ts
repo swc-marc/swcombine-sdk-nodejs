@@ -4,34 +4,60 @@
 
 import { BaseResource } from './BaseResource.js';
 
-export interface HelloWorldResponse {
-  message: string;
-  [key: string]: unknown;
-}
+// Note: HelloWorld endpoint returns a plain string, not an object
 
 export interface HelloAuthResponse {
   message: string;
-  character?: string;
+  /** OAuth client ID that authenticated this request */
+  client?: number;
   [key: string]: unknown;
 }
 
-export interface Permission {
+/**
+ * Permission attributes from API
+ */
+export interface PermissionAttributes {
   name: string;
-  description?: string;
-  [key: string]: unknown;
+  description: string;
+  inherits: string;
 }
 
-export interface RateLimitInfo {
+/**
+ * Single permission entry from API
+ */
+export interface Permission {
+  attributes: PermissionAttributes;
+}
+
+/**
+ * Rate limit attributes for a specific endpoint pattern
+ */
+export interface RateLimitAttributes {
+  pattern: string;
   limit: number;
   remaining: number;
   reset: number;
-  resetTime: string;
-  [key: string]: unknown;
+  reset_time: string;
 }
 
+/**
+ * Single rate limit entry from API
+ */
+export interface RateLimitEntry {
+  attributes: RateLimitAttributes;
+}
+
+/**
+ * CGT (Combine Galactic Time) response from API
+ */
 export interface TimeResponse {
-  currentTime: string;
-  timestamp: number;
+  years: number;
+  days: number;
+  hours: number;
+  mins: number;
+  secs: number;
+  /** Unix timestamp - only present in POST conversion responses */
+  timestamp?: number;
   [key: string]: unknown;
 }
 
@@ -57,11 +83,13 @@ export class ApiResource extends BaseResource {
   /**
    * Print a HelloWorld message
    * @requires_auth No
+   * @returns Plain string "Hello World"
    * @example
-   * const response = await client.api.helloWorld();
+   * const message = await client.api.helloWorld();
+   * console.log(message); // "Hello World"
    */
-  async helloWorld(): Promise<HelloWorldResponse> {
-    return this.request<HelloWorldResponse>('GET', '/api/helloworld');
+  async helloWorld(): Promise<string> {
+    return this.request<string>('GET', '/api/helloworld');
   }
 
   /**
@@ -80,19 +108,30 @@ export class ApiResource extends BaseResource {
    * @requires_auth No
    * @example
    * const permissions = await client.api.permissions();
+   * permissions.forEach(p => console.log(p.attributes.name, p.attributes.description));
    */
   async permissions(): Promise<Permission[]> {
-    return this.request<Permission[]>('GET', '/api/permissions');
+    const response = await this.http.get<{ permission?: Permission[]; attributes?: unknown }>(
+      '/api/permissions'
+    );
+    return response.permission || [];
   }
 
   /**
-   * Get current rate limit status
+   * Get current rate limit status for all endpoint patterns
    * @requires_auth No (shows public IP rate limits)
+   * @returns Array of rate limit entries, one per endpoint pattern
    * @example
    * const rateLimits = await client.api.rateLimits();
+   * rateLimits.forEach(rl => {
+   *   console.log(`${rl.attributes.pattern}: ${rl.attributes.remaining}/${rl.attributes.limit}`);
+   * });
    */
-  async rateLimits(): Promise<RateLimitInfo> {
-    return this.request<RateLimitInfo>('GET', '/api/ratelimits');
+  async rateLimits(): Promise<RateLimitEntry[]> {
+    const response = await this.http.get<{ ratelimit?: RateLimitEntry[]; attributes?: unknown }>(
+      '/api/ratelimits'
+    );
+    return response.ratelimit || [];
   }
 
   /**

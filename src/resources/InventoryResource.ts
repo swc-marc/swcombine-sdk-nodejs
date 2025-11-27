@@ -21,22 +21,13 @@ export class InventoryEntitiesResource extends BaseResource {
    * @param options.assignType - Assignment type: 'owner', 'commander', or 'pilot'
    * @param options.start_index - Starting position (1-based). Default: 1
    * @param options.item_count - Number of items to retrieve. Default: 50, Max: 200
-   * @param options.filter_type - Array of filter types (e.g., 'class', 'name', 'hp', 'tags')
+   * @param options.filter_type - Array of filter types (e.g., 'class', 'name', 'tags', 'powered')
    * @param options.filter_value - Array of values corresponding to each filter type
    * @param options.filter_inclusion - Array specifying 'includes' or 'excludes' for each filter
    * @example
    * const entities = await client.inventory.entities.list({ uid: '1:12345', entityType: 'vehicle', assignType: 'pilot' });
    * // Fetch up to 200 entities at once
    * const moreEntities = await client.inventory.entities.list({ uid: '1:12345', entityType: 'vehicle', assignType: 'pilot', start_index: 1, item_count: 200 });
-   * // Filter by HP
-   * const filteredEntities = await client.inventory.entities.list({
-   *   uid: '1:12345',
-   *   entityType: 'vehicle',
-   *   assignType: 'pilot',
-   *   filter_type: ['hp'],
-   *   filter_value: ['100'],
-   *   filter_inclusion: ['includes']
-   * });
    * // Filter by multiple criteria
    * const multiFiltered = await client.inventory.entities.list({
    *   uid: '1:12345',

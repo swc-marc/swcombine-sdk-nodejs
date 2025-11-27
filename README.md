@@ -18,14 +18,14 @@
 
 ## Features
 
-- ✨ **Full API Coverage** - All 60+ endpoints across 11 resource categories
-- 🔐 **OAuth 2.0 Built-in** - Complete OAuth flow with automatic token refresh
-- 📘 **TypeScript First** - Full type definitions with IntelliSense support
-- 🎯 **Type-Safe Scopes** - 230+ OAuth scope constants with autocomplete
-- 🔄 **Automatic Retries** - Exponential backoff for failed requests
-- 🌐 **Modern & Universal** - ES Modules + CommonJS, Node.js 18+
-- 🛠️ **Developer Tools** - Helper scripts for OAuth and testing
-- 📦 **Zero Dependencies** (except axios)
+- **Full API Coverage** - All 60+ endpoints across 11 resource categories
+- **OAuth 2.0 Built-in** - Complete OAuth flow with automatic token refresh
+- **TypeScript First** - Full type definitions with IntelliSense support
+- **Type-Safe Scopes** - 170+ OAuth scope constants with autocomplete
+- **Automatic Retries** - Exponential backoff for failed requests
+- **Modern & Universal** - ES Modules + CommonJS, Node.js 18+
+- **Developer Tools** - Helper scripts for OAuth and testing
+- **Zero Dependencies** (except axios)
 
 ## Installation
 
@@ -47,7 +47,7 @@ import { SWCombine } from 'swcombine-sdk';
 const client = new SWCombine({
   clientId: process.env.SWC_CLIENT_ID!,
   clientSecret: process.env.SWC_CLIENT_SECRET!,
-  accessToken: process.env.SWC_ACCESS_TOKEN, // Optional
+  token: process.env.SWC_ACCESS_TOKEN, // Optional - can be string or OAuthToken object
 });
 ```
 
@@ -70,7 +70,7 @@ console.log(character.name);   // "Character Name"
 const authenticatedClient = new SWCombine({
   clientId: process.env.SWC_CLIENT_ID!,
   clientSecret: process.env.SWC_CLIENT_SECRET!,
-  accessToken: process.env.SWC_ACCESS_TOKEN!,
+  token: process.env.SWC_ACCESS_TOKEN!,
 });
 
 // Get character details
@@ -156,7 +156,7 @@ import {
 
 // Use constants with autocomplete
 const scopes = [
-  CharacterScopes.READ,      // ✓ TypeScript suggests all scopes
+  CharacterScopes.READ,      // TypeScript suggests all scopes
   CharacterScopes.STATS,
   MessageScopes.SEND,
   Scopes.PersonalInventory.SHIPS.READ,
@@ -167,11 +167,28 @@ const readOnly = getReadOnlyScopes();
 const everything = getAllScopes();
 ```
 
-See [OAuth Scopes Guide](docs/SCOPES.md) for all 230+ available scopes.
+See [OAuth Scopes Guide](docs/SCOPES.md) for all 170+ available scopes.
 
 ## API Resources
 
 The SDK provides access to all SW Combine API resources:
+
+### API Utilities
+
+```typescript
+// Test connectivity
+await client.api.helloWorld();
+await client.api.helloAuth(); // Requires authentication
+
+// Get available permissions and rate limits
+await client.api.permissions();
+await client.api.rateLimits();
+
+// Time conversion (CGT = Combine Galactic Time)
+await client.api.time(); // Current time: { years, days, hours, mins, secs }
+await client.api.time({ cgt: 'Y26D100' }); // CGT to Unix timestamp
+await client.api.time({ time: 1701432000 }); // Unix timestamp to CGT
+```
 
 ### Characters
 
@@ -180,12 +197,24 @@ The SDK provides access to all SW Combine API resources:
 await client.character.getByHandle({ handle: 'character-handle' });
 
 // Authenticated endpoints
+await client.character.me(); // Get authenticated user's character
 await client.character.get({ uid: '1:12345' });
 await client.character.skills.list({ uid: '1:12345' });
 await client.character.privileges.list({ uid: '1:12345' });
-await client.character.credits.get({ uid: '1:12345' });
-await client.character.messages.list({ uid: '1:12345', mode: 'received' });
+await client.character.privileges.get({ uid: '1:12345', privilegeGroup: 'group', privilege: 'name' });
+await client.character.credits.get({ uid: '1:12345' }); // Returns credit balance as number
+await client.character.credits.transfer({ uid: '1:12345', amount: 1000, recipient: '1:67890' });
+await client.character.creditlog.list({ uid: '1:12345' });
 await client.character.permissions.list({ uid: '1:12345' });
+await client.character.hasPermission({ uid: '1:12345', permission: 'CHARACTER_READ' });
+
+// Messages
+await client.character.messages.list({ uid: '1:12345' }); // All messages (sent + received)
+await client.character.messages.list({ uid: '1:12345', mode: 'received' }); // Only received
+await client.character.messages.list({ uid: '1:12345', mode: 'sent' }); // Only sent
+await client.character.messages.get({ uid: '1:12345', messageId: 'msg-123' });
+await client.character.messages.create({ uid: '1:12345', receivers: 'recipient1;recipient2', communication: 'Hello!' });
+await client.character.messages.delete({ uid: '1:12345', messageId: 'msg-123' });
 ```
 
 ### Factions
@@ -193,8 +222,13 @@ await client.character.permissions.list({ uid: '1:12345' });
 ```typescript
 await client.faction.list();
 await client.faction.get({ uid: '20:123' });
-await client.faction.members.list({ uid: '20:123' });
-await client.faction.budgets.list({ uid: '20:123' });
+await client.faction.members.list({ factionId: '20:123' });
+await client.faction.budgets.list({ factionId: '20:123' });
+await client.faction.budgets.get({ factionId: '20:123', budgetId: 'budget-uid' });
+await client.faction.stockholders.list({ factionId: '20:123' });
+await client.faction.credits.get({ factionId: '20:123' });
+await client.faction.credits.update({ factionId: '20:123', amount: 1000, recipient: '1:12345' });
+await client.faction.creditlog.list({ factionId: '20:123' });
 ```
 
 ### Inventory
@@ -203,31 +237,128 @@ await client.faction.budgets.list({ uid: '20:123' });
 await client.inventory.get({ uid: '1:12345' });
 await client.inventory.entities.list({
   uid: '1:12345',
-  entityType: 'vehicle',
-  assignType: 'pilot',
+  entityType: 'ships', // ships, vehicles, stations, cities, facilities, planets, items, npcs, droids, creatures, materials
+  assignType: 'owner', // owner, commander, pilot
 });
+await client.inventory.entities.get({ entityType: 'ships', uid: '5:12345' });
+
+// Entity management
+await client.inventory.entities.updateProperty({
+  entityType: 'ships',
+  uid: '5:12345',
+  property: 'name', // name, owner, commander, pilot, infotext, etc.
+  new_value: 'New Ship Name',
+});
+await client.inventory.entities.addTag({ entityType: 'ships', uid: '5:12345', tag: 'favorite' });
+await client.inventory.entities.removeTag({ entityType: 'ships', uid: '5:12345', tag: 'favorite' });
 ```
 
 ### Galaxy
 
 ```typescript
+// Systems, planets, sectors
 await client.galaxy.systems.list();
+await client.galaxy.systems.get({ uid: '24:123' });
 await client.galaxy.planets.list();
+await client.galaxy.planets.get({ uid: '23:456' });
 await client.galaxy.sectors.list();
+await client.galaxy.sectors.get({ uid: 'seswenna' }); // Use lowercase sector name
+
+// Stations and cities
+await client.galaxy.stations.list();
+await client.galaxy.stations.get({ uid: '6:789' });
+await client.galaxy.cities.list();
+await client.galaxy.cities.get({ uid: '22:101' });
 ```
 
-### Events, Location, Datacards, and More
+### Events
 
 ```typescript
-await client.events.list({ eventMode: 'character', eventType: 'all' });
+// Note: Events uses 0-based indexing unlike other endpoints
+await client.events.list({ eventMode: 'personal' }); // personal, faction, inventory, combat
+await client.events.list({ eventMode: 'personal', eventType: 'all', start_index: 0, item_count: 100 });
+await client.events.get({ uid: 'event-uid' });
+```
+
+### Location
+
+```typescript
 await client.location.get({ entityType: 'character', uid: '1:12345' });
+await client.location.get({ entityType: 'ships', uid: '5:12345' });
+```
+
+### Datacards
+
+```typescript
 await client.datacard.list({ factionId: '20:123' });
-await client.market.listings.list();
-await client.news.list();
-await client.types.races.list();
+await client.datacard.get({ uid: 'datacard-uid' });
+await client.datacard.create({ uid: 'datacard-uid', production_entity_uid: '6:789', uses: 10 });
+await client.datacard.delete({ uid: 'datacard-uid', production_entity_uid: '6:789' });
+```
+
+### Market
+
+```typescript
+await client.market.vendors.list();
+await client.market.vendors.get({ uid: 'vendor-uid' });
+```
+
+### News
+
+```typescript
+// Galactic News Service (GNS)
+await client.news.gns.list();
+await client.news.gns.list({ category: 'economy', search: 'battle', author: 'John Doe' });
+await client.news.gns.get({ id: 'news-id' });
+
+// Sim News
+await client.news.simNews.list();
+await client.news.simNews.list({ category: 'player' });
+await client.news.simNews.get({ id: 'news-id' });
+```
+
+### Types
+
+```typescript
+// List all entity types
+await client.types.listEntityTypes();
+
+// Get entity classes for a specific type
+await client.types.classes.list({ entityType: 'vehicles' });
+await client.types.classes.list({ entityType: 'ships' });
+
+// Get entities by type
+await client.types.entities.list({ entityType: 'ships' });
+await client.types.entities.list({ entityType: 'ships', class: 'fighter' });
+await client.types.entities.get({ entityType: 'ships', uid: 'type-uid' });
 ```
 
 See [API Documentation](docs/API.md) for complete reference.
+
+## Rate Limiting
+
+The SW Combine API has a rate limit of **600 requests per hour**. The SDK provides tools to monitor and handle rate limits:
+
+```typescript
+// Check current rate limit status after any API call
+const rateLimit = client.getRateLimitInfo();
+if (rateLimit) {
+  console.log(`${rateLimit.remaining}/${rateLimit.limit} requests remaining`);
+  console.log(`Resets at: ${rateLimit.resetTime}`);
+}
+
+// Set up a callback to monitor rate limits in real-time
+client.onRateLimitUpdate((info) => {
+  if (info.remaining < 100) {
+    console.warn(`Warning: Only ${info.remaining} API requests remaining!`);
+  }
+});
+
+// Or check via API endpoint for detailed per-endpoint limits
+const limits = await client.api.rateLimits();
+```
+
+The SDK automatically handles rate limit errors with exponential backoff and respects the `Retry-After` header when provided.
 
 ## Error Handling
 
@@ -258,8 +389,8 @@ const character = await client.character.get({ uid: '1:12345' });
 // Request parameters are typed
 await client.character.messages.list({
   uid: '1:12345',
-  mode: 'received', // TypeScript knows valid values
-  // mode: 'invalid', // ❌ TypeScript error
+  mode: 'received', // Optional - TypeScript knows valid values: 'sent' | 'received'
+  // mode: 'invalid', // TypeScript error
 });
 ```
 
@@ -271,9 +402,8 @@ interface ClientConfig {
   clientId: string;
   clientSecret: string;
 
-  // Optional authentication
-  accessToken?: string;
-  refreshToken?: string;
+  // Optional authentication - can be access token string or full OAuthToken object
+  token?: string | OAuthToken;
 
   // Optional OAuth settings
   redirectUri?: string;
@@ -285,6 +415,12 @@ interface ClientConfig {
   maxRetries?: number;        // Default: 3
   retryDelay?: number;        // Default: 1000ms
   debug?: boolean;            // Default: false
+}
+
+interface OAuthToken {
+  accessToken: string;
+  refreshToken?: string;
+  expiresAt: number;          // Timestamp in milliseconds
 }
 ```
 
@@ -393,12 +529,12 @@ Contributions are welcome! Please:
 
 ## Support
 
-- 📖 Check the [documentation](docs/)
-- 💬 Submit issues on [GitHub](https://github.com/yourusername/swcombine-sdk-nodejs/issues)
-- 📧 Contact support
+- Check the [documentation](docs/)
+- Submit issues on [GitHub](https://github.com/yourusername/swcombine-sdk-nodejs/issues)
+- Contact support
 
 ---
 
 <div align="center">
-Made with ❤️ for the Star Wars Combine community
+Made for the Star Wars Combine community
 </div>

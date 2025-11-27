@@ -10,6 +10,7 @@ import axios, {
 } from 'axios';
 import { SWCError } from './errors.js';
 import type { TokenManager } from '../auth/TokenManager.js';
+import type { RateLimitInfo } from '../types/index.js';
 
 export interface HttpClientOptions {
   baseURL?: string;
@@ -17,6 +18,8 @@ export interface HttpClientOptions {
   maxRetries?: number;
   retryDelay?: number;
   debug?: boolean;
+  /** Callback fired when rate limit info is received from API */
+  onRateLimitUpdate?: (info: RateLimitInfo) => void;
 }
 
 /**
@@ -28,12 +31,15 @@ export class HttpClient {
   private maxRetries: number;
   private retryDelay: number;
   private debug: boolean;
+  private onRateLimitUpdate?: (info: RateLimitInfo) => void;
+  private _lastRateLimitInfo: RateLimitInfo | null = null;
 
   constructor(options: HttpClientOptions, tokenManager?: TokenManager) {
     this.tokenManager = tokenManager;
     this.maxRetries = options.maxRetries ?? 3;
     this.retryDelay = options.retryDelay ?? 1000;
     this.debug = options.debug ?? false;
+    this.onRateLimitUpdate = options.onRateLimitUpdate;
 
     // Create axios instance
     this.axios = axios.create({
@@ -105,20 +111,32 @@ export class HttpClient {
   private setupResponseInterceptor(): void {
     this.axios.interceptors.response.use(
       (response) => {
-        // Log rate limit headers if available
-        if (response.headers && this.debug) {
-          const rateLimitInfo = {
-            limit: response.headers['x-ratelimit-limit'],
-            remaining: response.headers['x-ratelimit-remaining'],
-            reset: response.headers['x-ratelimit-reset'],
-            resetTime: response.headers['x-ratelimit-resettime'],
-          };
+        // Extract and store rate limit headers if available
+        if (response.headers) {
+          const limit = response.headers['x-ratelimit-limit'];
+          const remaining = response.headers['x-ratelimit-remaining'];
+          const reset = response.headers['x-ratelimit-reset'];
+          const resetTime = response.headers['x-ratelimit-resettime'];
 
-          if (rateLimitInfo.limit) {
-            console.log(
-              `[SWC SDK] Rate Limit: ${rateLimitInfo.remaining}/${rateLimitInfo.limit} remaining` +
-                ` (resets at ${rateLimitInfo.resetTime || new Date(parseInt(rateLimitInfo.reset) * 1000).toISOString()})`
-            );
+          if (limit) {
+            this._lastRateLimitInfo = {
+              limit: parseInt(limit, 10),
+              remaining: parseInt(remaining, 10),
+              reset: parseInt(reset, 10),
+              resetTime: resetTime || new Date(parseInt(reset, 10) * 1000).toISOString(),
+            };
+
+            // Call the callback if registered
+            if (this.onRateLimitUpdate) {
+              this.onRateLimitUpdate(this._lastRateLimitInfo);
+            }
+
+            if (this.debug) {
+              console.log(
+                `[SWC SDK] Rate Limit: ${this._lastRateLimitInfo.remaining}/${this._lastRateLimitInfo.limit} remaining` +
+                  ` (resets at ${this._lastRateLimitInfo.resetTime})`
+              );
+            }
           }
         }
 
@@ -159,16 +177,33 @@ export class HttpClient {
         if (this.shouldRetry(error, config._retryCount ?? 0)) {
           config._retryCount = (config._retryCount ?? 0) + 1;
 
-          // Wait before retrying (exponential backoff)
-          const delay = this.retryDelay * Math.pow(2, config._retryCount - 1);
-          await this.sleep(delay);
+          // Calculate delay: use Retry-After header if available, otherwise exponential backoff
+          let delay = this.retryDelay * Math.pow(2, config._retryCount - 1);
+
+          // Check for Retry-After header (used for rate limiting)
+          const retryAfter = error.response?.headers?.['retry-after'];
+          if (retryAfter) {
+            // Retry-After can be seconds (number) or HTTP date
+            const retryAfterSeconds = parseInt(retryAfter, 10);
+            if (!isNaN(retryAfterSeconds)) {
+              delay = retryAfterSeconds * 1000; // Convert to milliseconds
+            } else {
+              // Try parsing as HTTP date
+              const retryDate = new Date(retryAfter);
+              if (!isNaN(retryDate.getTime())) {
+                delay = Math.max(0, retryDate.getTime() - Date.now());
+              }
+            }
+          }
 
           if (this.debug) {
             console.log(
-              `[SWC SDK] Retrying request (attempt ${config._retryCount}/${this.maxRetries})`
+              `[SWC SDK] Retrying request in ${delay}ms (attempt ${config._retryCount}/${this.maxRetries})` +
+                (retryAfter ? ` [Retry-After: ${retryAfter}]` : '')
             );
           }
 
+          await this.sleep(delay);
           return this.axios.request(config);
         }
 
@@ -285,5 +320,38 @@ export class HttpClient {
    */
   setTokenManager(tokenManager: TokenManager): void {
     this.tokenManager = tokenManager;
+  }
+
+  /**
+   * Get the last known rate limit information from API response headers.
+   * Returns null if no rate limit info has been received yet.
+   *
+   * @example
+   * ```typescript
+   * const rateLimits = client.getRateLimitInfo();
+   * if (rateLimits) {
+   *   console.log(`${rateLimits.remaining}/${rateLimits.limit} requests remaining`);
+   *   console.log(`Resets at: ${rateLimits.resetTime}`);
+   * }
+   * ```
+   */
+  getRateLimitInfo(): RateLimitInfo | null {
+    return this._lastRateLimitInfo;
+  }
+
+  /**
+   * Set a callback to be notified when rate limit info is updated.
+   *
+   * @example
+   * ```typescript
+   * client.setRateLimitCallback((info) => {
+   *   if (info.remaining < 100) {
+   *     console.warn(`Warning: Only ${info.remaining} API requests remaining!`);
+   *   }
+   * });
+   * ```
+   */
+  setRateLimitCallback(callback: (info: RateLimitInfo) => void): void {
+    this.onRateLimitUpdate = callback;
   }
 }

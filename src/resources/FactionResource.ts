@@ -257,12 +257,16 @@ export class FactionResource extends BaseResource {
    * Get faction by UID
    * @requires_auth Yes
    * @requires_scope FACTION_READ
-   * @param options - Faction UID
+   * @param options - Optional faction UID. If omitted or uid not provided, returns the authenticated user's primary faction.
    * @example
+   * // Get a specific faction
    * const faction = await client.faction.get({ uid: '20:123' });
+   * // Get the authenticated user's faction
+   * const myFaction = await client.faction.get();
    */
-  async get(options: GetFactionOptions): Promise<Faction> {
-    return this.request<Faction>('GET', `/faction/${options.uid}`);
+  async get(options?: GetFactionOptions): Promise<Faction> {
+    const path = options?.uid ? `/faction/${options.uid}` : '/faction/';
+    return this.request<Faction>('GET', path);
   }
 
   /**

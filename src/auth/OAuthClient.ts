@@ -119,13 +119,13 @@ export class OAuthClient {
       throw new Error('redirectUri is required for token exchange');
     }
 
+    // Note: access_type is only used in authorization URL, not token exchange
     const params = new URLSearchParams({
       code,
       client_id: this.clientId,
       client_secret: this.clientSecret,
       redirect_uri: this.redirectUri,
       grant_type: GrantType.AuthorizationCode,
-      access_type: this.accessType,
     });
 
     try {

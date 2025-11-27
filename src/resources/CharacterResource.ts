@@ -7,7 +7,6 @@ import { BaseResource } from './BaseResource.js';
 import {
   Character,
   Message,
-  Skill,
   GetCharacterOptions,
   GetCharacterByHandleOptions,
   ListMessagesOptions,
@@ -21,16 +20,9 @@ import {
   GetCharacterPermissionsOptions,
 } from '../types/index.js';
 
-export interface Privilege {
-  name: string;
-  granted: boolean;
-  [key: string]: unknown;
-}
+// Note: Privilege interface moved to CharacterPrivilegesResource section with correct structure
 
-export interface Credits {
-  amount: number;
-  [key: string]: unknown;
-}
+// Note: Character credits endpoint returns a plain number, not an object
 
 export interface CreditLogEntry {
   timestamp: string;
@@ -48,9 +40,14 @@ export class CharacterMessagesResource extends BaseResource {
    * List messages sent or received by character (paginated)
    * @requires_auth Yes
    * @requires_scope MESSAGES_READ
-   * @param options - Character UID, message mode, and optional pagination parameters
+   * @param options - Character UID, optional message mode, and optional pagination parameters
+   * @param options.uid - Character UID
+   * @param options.mode - 'sent' or 'received'. If omitted, returns both sent and received messages.
+   * @param options.start_index - Starting position (1-based). Default: 1
+   * @param options.item_count - Number of items to retrieve. Default: 50, Max: 50
    * @example
-   * const messages = await client.character.messages.list({ uid: '1:12345', mode: 'received' });
+   * const allMessages = await client.character.messages.list({ uid: '1:12345' });
+   * const received = await client.character.messages.list({ uid: '1:12345', mode: 'received' });
    * const moreMessages = await client.character.messages.list({ uid: '1:12345', mode: 'received', start_index: 51, item_count: 50 });
    */
   async list(options: ListMessagesOptions): Promise<Message[]> {
@@ -58,13 +55,19 @@ export class CharacterMessagesResource extends BaseResource {
       start_index: options.start_index || 1,
       item_count: options.item_count || 50,
     };
-    const response = await this.http.get<{ message?: Message[]; attributes?: unknown }>(`/character/${options.uid}/messages/${options.mode}`, { params });
+    // Build path - mode is optional, omitting it returns both sent and received
+    const path = options.mode
+      ? `/character/${options.uid}/messages/${options.mode}`
+      : `/character/${options.uid}/messages`;
+    const response = await this.http.get<{ message?: Message[]; attributes?: unknown }>(path, { params });
     // API returns { attributes: {...}, message: [...] }, extract just the array
     return response.message || [];
   }
 
   /**
    * Get a specific message
+   * @requires_auth Yes
+   * @requires_scope MESSAGES_READ
    */
   async get(options: GetMessageOptions): Promise<Message> {
     return this.request<Message>('GET', `/character/${options.uid}/messages/${options.messageId}`);
@@ -72,6 +75,8 @@ export class CharacterMessagesResource extends BaseResource {
 
   /**
    * Delete a message
+   * @requires_auth Yes
+   * @requires_scope MESSAGES_DELETE
    */
   async delete(options: DeleteMessageOptions): Promise<void> {
     return this.request<void>('DELETE', `/character/${options.uid}/messages/${options.messageId}`);
@@ -100,15 +105,91 @@ export class CharacterMessagesResource extends BaseResource {
 }
 
 /**
+ * Skill entry from API
+ */
+export interface SkillEntry {
+  attributes: {
+    type: string;
+  };
+  value: number;
+}
+
+/**
+ * Skill category from API
+ */
+export interface SkillCategory {
+  attributes?: {
+    force?: string;
+    count?: number;
+  };
+  skill: SkillEntry[];
+}
+
+/**
+ * Character skills response - organized by category
+ */
+export interface CharacterSkills {
+  general?: SkillCategory[];
+  space?: SkillCategory[];
+  ground?: SkillCategory[];
+  social?: SkillCategory[];
+  science?: SkillCategory[];
+  light?: SkillCategory[];
+  dark?: SkillCategory[];
+  neutral?: SkillCategory[];
+  [key: string]: SkillCategory[] | undefined;
+}
+
+/**
  * Character skills resource
  */
 export class CharacterSkillsResource extends BaseResource {
   /**
-   * Get character's skills
+   * Get character's skills organized by category
+   * @requires_auth Yes
+   * @requires_scope CHARACTER_SKILLS
+   * @returns Skills object with categories: general, space, ground, social, science, light, dark, neutral
+   * @example
+   * const skills = await client.character.skills.list({ uid: '1:12345' });
+   * skills.general?.[0].skill.forEach(s => console.log(s.attributes.type, s.value));
    */
-  async list(options: GetCharacterSkillsOptions): Promise<Skill[]> {
-    return this.request<Skill[]>('GET', `/character/${options.uid}/skills`);
+  async list(options: GetCharacterSkillsOptions): Promise<CharacterSkills> {
+    return this.request<CharacterSkills>('GET', `/character/${options.uid}/skills`);
   }
+}
+
+/**
+ * Privilege detail from API
+ */
+export interface PrivilegeDetail {
+  attributes: {
+    uid: string;
+    href?: string;
+  };
+  value: string; // "true" or "false"
+}
+
+/**
+ * Privilege group from API
+ */
+export interface PrivilegeGroup {
+  attributes: {
+    name: string;
+    count: number;
+  };
+  privilege: PrivilegeDetail[];
+}
+
+/**
+ * Full privileges response from API
+ */
+export interface PrivilegesResponse {
+  privilegegroup: PrivilegeGroup[];
+  attributes: {
+    faction_id: number;
+    faction_name: string;
+    count: number;
+  };
 }
 
 /**
@@ -116,14 +197,30 @@ export class CharacterSkillsResource extends BaseResource {
  */
 export class CharacterPrivilegesResource extends BaseResource {
   /**
-   * Get character's privileges
+   * Get character's privileges organized by group
+   * @requires_auth Yes
+   * @requires_scope CHARACTER_PRIVILEGES
+   * @param options.uid - Character UID
+   * @param options.faction_id - Optional faction ID (defaults to token owner's primary faction)
+   * @returns Privileges response with groups and metadata
+   * @example
+   * const privs = await client.character.privileges.list({ uid: '1:12345' });
+   * privs.privilegegroup.forEach(g => {
+   *   console.log(`${g.attributes.name}: ${g.attributes.count} privileges`);
+   * });
    */
-  async list(options: GetCharacterPrivilegesOptions): Promise<Privilege[]> {
-    return this.request<Privilege[]>('GET', `/character/${options.uid}/privileges`);
+  async list(options: GetCharacterPrivilegesOptions & { faction_id?: number }): Promise<PrivilegesResponse> {
+    const params: Record<string, number> = {};
+    if (options.faction_id !== undefined) {
+      params.faction_id = options.faction_id;
+    }
+    return this.http.get<PrivilegesResponse>(`/character/${options.uid}/privileges`, { params });
   }
 
   /**
    * Get a specific privilege
+   * @requires_auth Yes
+   * @requires_scope CHARACTER_PRIVILEGES
    * @param options.uid - Character UID
    * @param options.privilegeGroup - Privilege group name
    * @param options.privilege - Privilege name
@@ -134,13 +231,13 @@ export class CharacterPrivilegesResource extends BaseResource {
     privilegeGroup: string;
     privilege: string;
     faction_id?: number;
-  }): Promise<Privilege> {
-    const params: any = {};
+  }): Promise<PrivilegeDetail> {
+    const params: Record<string, number> = {};
     if (options.faction_id !== undefined) {
       params.faction_id = options.faction_id;
     }
 
-    return this.http.get<Privilege>(
+    return this.http.get<PrivilegeDetail>(
       `/character/${options.uid}/privileges/${options.privilegeGroup}/${options.privilege}`,
       { params }
     );
@@ -160,20 +257,20 @@ export class CharacterPrivilegesResource extends BaseResource {
     privilege: string;
     revoke?: boolean;
     faction_id?: number;
-  }): Promise<Privilege> {
-    const data: any = {};
+  }): Promise<unknown> {
+    const data: Record<string, string> = {};
     if (options.revoke) {
       // Any non-empty string revokes the privilege
       data.revoke = 'true';
     }
     // If revoke is not set or false, the privilege is granted (no parameter needed)
 
-    const params: any = {};
+    const params: Record<string, number> = {};
     if (options.faction_id !== undefined) {
       params.faction_id = options.faction_id;
     }
 
-    return this.http.post<Privilege>(
+    return this.http.post<unknown>(
       `/character/${options.uid}/privileges/${options.privilegeGroup}/${options.privilege}`,
       data,
       { params }
@@ -186,37 +283,43 @@ export class CharacterPrivilegesResource extends BaseResource {
  */
 export class CharacterCreditsResource extends BaseResource {
   /**
-   * Get character's credits
+   * Get character's credit balance
+   * @requires_auth Yes
+   * @requires_scope CHARACTER_CREDITS
+   * @returns Credit balance as a plain number
+   * @example
+   * const credits = await client.character.credits.get({ uid: '1:12345' });
+   * console.log(`Credits: ${credits}`); // Credits: 320089347
    */
-  async get(options: GetCharacterCreditsOptions): Promise<Credits> {
-    return this.request<Credits>('GET', `/character/${options.uid}/credits`);
+  async get(options: GetCharacterCreditsOptions): Promise<number> {
+    return this.request<number>('GET', `/character/${options.uid}/credits`);
   }
 
   /**
-   * Update character's credits (transfer)
+   * Transfer credits from character to another character or faction
    * @param options.uid - Character UID
    * @param options.amount - Amount to transfer
-   * @param options.recipient - Recipient character or faction UID (optional)
+   * @param options.recipient - Recipient character or faction name/UID (REQUIRED)
    * @param options.reason - Reason for transfer (optional, API will auto-append client name)
+   * @requires_auth Yes
+   * @requires_scope CHARACTER_CREDITS_WRITE
    */
-  async update(options: {
+  async transfer(options: {
     uid: string;
     amount: number;
-    recipient?: string;
+    recipient: string;
     reason?: string;
-  }): Promise<Credits> {
-    const data: any = {
+  }): Promise<unknown> {
+    const data: Record<string, unknown> = {
       amount: options.amount,
+      recipient: options.recipient,
     };
 
-    if (options.recipient) {
-      data.recipient = options.recipient;
-    }
     if (options.reason) {
       data.reason = options.reason;
     }
 
-    return this.request<Credits>('POST', `/character/${options.uid}/credits`, data);
+    return this.request<unknown>('POST', `/character/${options.uid}/credits`, data);
   }
 }
 
@@ -227,6 +330,8 @@ export class CharacterCreditlogResource extends BaseResource {
   /**
    * Get character's credit log (paginated)
    *
+   * @requires_auth Yes
+   * @requires_scope CHARACTER_CREDITS
    * @param options - Character UID and optional pagination/filtering parameters
    * @param options.uid - Character UID
    * @param options.start_index - Starting position (1-based). Default: 1
@@ -254,14 +359,47 @@ export class CharacterCreditlogResource extends BaseResource {
 }
 
 /**
+ * Character permission scope entry
+ */
+export interface CharacterPermissionEntry {
+  scopes: {
+    scope: string[];
+  };
+  attributes: {
+    expires: number;
+  };
+}
+
+/**
+ * Character permissions response from API
+ */
+export interface CharacterPermissionsResponse {
+  permission: CharacterPermissionEntry[];
+}
+
+/**
  * Character permissions resource
  */
 export class CharacterPermissionsResource extends BaseResource {
   /**
    * Get permissions granted to API client for this character
+   * @returns Full permissions response with scopes and expiration
+   * @example
+   * const perms = await client.character.permissions.list({ uid: '1:12345' });
+   * const scopes = perms.permission[0]?.scopes.scope || [];
+   * console.log('Granted scopes:', scopes.join(', '));
    */
-  async list(options: GetCharacterPermissionsOptions): Promise<string[]> {
-    return this.request<string[]>('GET', `/character/${options.uid}/permissions`);
+  async list(options: GetCharacterPermissionsOptions): Promise<CharacterPermissionsResponse> {
+    return this.request<CharacterPermissionsResponse>('GET', `/character/${options.uid}/permissions`);
+  }
+
+  /**
+   * Get flat list of granted scope names
+   * @returns Array of scope strings (e.g., ['CHARACTER_READ', 'MESSAGES_SEND'])
+   */
+  async getScopes(options: GetCharacterPermissionsOptions): Promise<string[]> {
+    const response = await this.list(options);
+    return response.permission?.[0]?.scopes?.scope || [];
   }
 }
 
@@ -330,8 +468,8 @@ export class CharacterResource extends BaseResource {
    */
   async hasPermission(options: { uid: string; permission: string }): Promise<boolean> {
     try {
-      const permissions = await this.permissions.list({ uid: options.uid });
-      return permissions.includes(options.permission);
+      const scopes = await this.permissions.getScopes({ uid: options.uid });
+      return scopes.includes(options.permission);
     } catch (error) {
       // If we can't fetch permissions, assume we don't have access
       return false;

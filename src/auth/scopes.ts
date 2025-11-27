@@ -12,27 +12,27 @@
  */
 export const CharacterScopes = {
   /** Solely provides the character name and ID for use by clients who want to verify a character's identity */
-  AUTH: 'CHARACTER_AUTH',
+  AUTH: 'character_auth',
   /** Read basic character information (UID, handle, image, race, gender, etc.) */
-  READ: 'CHARACTER_READ',
+  READ: 'character_read',
   /** Read character HP and XP */
-  STATS: 'CHARACTER_STATS',
+  STATS: 'character_stats',
   /** Read character privileges */
-  PRIVILEGES: 'CHARACTER_PRIVILEGES',
+  PRIVILEGES: 'character_privileges',
   /** Read character skills */
-  SKILLS: 'CHARACTER_SKILLS',
+  SKILLS: 'character_skills',
   /** Read character credit information */
-  CREDITS: 'CHARACTER_CREDITS',
+  CREDITS: 'character_credits',
   /** Transfer character credits */
-  CREDITS_WRITE: 'CHARACTER_CREDITS_WRITE',
+  CREDITS_WRITE: 'character_credits_write',
   /** Read character force-related information (FP, FXP, regen rate, Force Meter) */
-  FORCE: 'CHARACTER_FORCE',
+  FORCE: 'character_force',
   /** Read location information in-game */
-  LOCATION: 'CHARACTER_LOCATION',
+  LOCATION: 'character_location',
   /** Read character events */
-  EVENTS: 'CHARACTER_EVENTS',
+  EVENTS: 'character_events',
   /** Access all character information (includes all above) */
-  ALL: 'CHARACTER_ALL',
+  ALL: 'character_all',
 } as const;
 
 /**
@@ -40,13 +40,13 @@ export const CharacterScopes = {
  */
 export const MessageScopes = {
   /** Read messages */
-  READ: 'MESSAGES_READ',
+  READ: 'messages_read',
   /** Send messages */
-  SEND: 'MESSAGES_SEND',
+  SEND: 'messages_send',
   /** Delete messages */
-  DELETE: 'MESSAGES_DELETE',
+  DELETE: 'messages_delete',
   /** All message permissions */
-  ALL: 'MESSAGES_ALL',
+  ALL: 'messages_all',
 } as const;
 
 /**
@@ -55,17 +55,17 @@ export const MessageScopes = {
 function generatePersonalInventoryScopes(entityType: string, hasRename: boolean = true) {
   const scopes: Record<string, string> = {};
 
-  scopes.READ = `PERSONAL_INV_${entityType}_READ`;
+  scopes.READ = `personal_inv_${entityType}_read`;
   if (hasRename) {
-    scopes.RENAME = `PERSONAL_INV_${entityType}_RENAME`;
+    scopes.RENAME = `personal_inv_${entityType}_rename`;
   }
-  scopes.ASSIGN = `PERSONAL_INV_${entityType}_ASSIGN`;
+  scopes.ASSIGN = `personal_inv_${entityType}_assign`;
   if (hasRename) {
-    scopes.MAKEOVER = `PERSONAL_INV_${entityType}_MAKEOVER`;
+    scopes.MAKEOVER = `personal_inv_${entityType}_makeover`;
   }
-  scopes.TAGS_READ = `PERSONAL_INV_${entityType}_TAGS_READ`;
-  scopes.TAGS_WRITE = `PERSONAL_INV_${entityType}_TAGS_WRITE`;
-  scopes.ALL = `PERSONAL_INV_${entityType}_ALL`;
+  scopes.TAGS_READ = `personal_inv_${entityType}_tags_read`;
+  scopes.TAGS_WRITE = `personal_inv_${entityType}_tags_write`;
+  scopes.ALL = `personal_inv_${entityType}_all`;
 
   return scopes;
 }
@@ -75,47 +75,55 @@ function generatePersonalInventoryScopes(entityType: string, hasRename: boolean 
  */
 export const PersonalInventoryScopes = {
   /** Overview of personal inventory */
-  OVERVIEW: 'PERSONAL_INV_OVERVIEW',
+  OVERVIEW: 'personal_inv_overview',
 
   /** Personal ship scopes */
-  SHIPS: generatePersonalInventoryScopes('SHIPS'),
+  SHIPS: generatePersonalInventoryScopes('ships'),
 
   /** Personal vehicle scopes */
-  VEHICLES: generatePersonalInventoryScopes('VEHICLES'),
+  VEHICLES: generatePersonalInventoryScopes('vehicles'),
 
   /** Personal station scopes */
-  STATIONS: generatePersonalInventoryScopes('STATIONS'),
+  STATIONS: generatePersonalInventoryScopes('stations'),
 
   /** Personal city scopes */
-  CITIES: generatePersonalInventoryScopes('CITIES'),
+  CITIES: generatePersonalInventoryScopes('cities'),
 
   /** Personal facility scopes */
-  FACILITIES: generatePersonalInventoryScopes('FACILITIES'),
+  FACILITIES: generatePersonalInventoryScopes('facilities'),
 
   /** Personal planet scopes (no RENAME/MAKEOVER) */
-  PLANETS: generatePersonalInventoryScopes('PLANETS', false),
+  PLANETS: generatePersonalInventoryScopes('planets', false),
 
   /** Personal item scopes */
-  ITEMS: generatePersonalInventoryScopes('ITEMS'),
+  ITEMS: generatePersonalInventoryScopes('items'),
 
-  /** Personal NPC scopes (no RENAME) */
-  NPCS: generatePersonalInventoryScopes('NPCS', false),
+  /** Personal NPC scopes (has MAKEOVER but no RENAME) */
+  NPCS: {
+    READ: 'personal_inv_npcs_read',
+    ASSIGN: 'personal_inv_npcs_assign',
+    MAKEOVER: 'personal_inv_npcs_makeover',
+    // Note: NPCs do not have RENAME scope
+    TAGS_READ: 'personal_inv_npcs_tags_read',
+    TAGS_WRITE: 'personal_inv_npcs_tags_write',
+    ALL: 'personal_inv_npcs_all',
+  },
 
   /** Personal droid scopes */
-  DROIDS: generatePersonalInventoryScopes('DROIDS'),
+  DROIDS: generatePersonalInventoryScopes('droids'),
 
   /** Personal material scopes (no ASSIGN) */
   MATERIALS: {
-    READ: 'PERSONAL_INV_MATERIALS_READ',
-    RENAME: 'PERSONAL_INV_MATERIALS_RENAME',
-    MAKEOVER: 'PERSONAL_INV_MATERIALS_MAKEOVER',
-    TAGS_READ: 'PERSONAL_INV_MATERIALS_TAGS_READ',
-    TAGS_WRITE: 'PERSONAL_INV_MATERIALS_TAGS_WRITE',
-    ALL: 'PERSONAL_INV_MATERIALS_ALL',
+    READ: 'personal_inv_materials_read',
+    RENAME: 'personal_inv_materials_rename',
+    MAKEOVER: 'personal_inv_materials_makeover',
+    TAGS_READ: 'personal_inv_materials_tags_read',
+    TAGS_WRITE: 'personal_inv_materials_tags_write',
+    ALL: 'personal_inv_materials_all',
   },
 
   /** Personal creature scopes */
-  CREATURES: generatePersonalInventoryScopes('CREATURES'),
+  CREATURES: generatePersonalInventoryScopes('creatures'),
 } as const;
 
 /**
@@ -123,25 +131,25 @@ export const PersonalInventoryScopes = {
  */
 export const FactionScopes = {
   /** Read faction information */
-  READ: 'FACTION_READ',
+  READ: 'faction_read',
   /** Read faction members */
-  MEMBERS: 'FACTION_MEMBERS',
+  MEMBERS: 'faction_members',
   /** Read faction stocks */
-  STOCKS: 'FACTION_STOCKS',
+  STOCKS: 'faction_stocks',
   /** Read faction credits */
-  CREDITS_READ: 'FACTION_CREDITS_READ',
+  CREDITS_READ: 'faction_credits_read',
   /** Write/transfer faction credits */
-  CREDITS_WRITE: 'FACTION_CREDITS_WRITE',
+  CREDITS_WRITE: 'faction_credits_write',
   /** Read faction budgets */
-  BUDGETS_READ: 'FACTION_BUDGETS_READ',
+  BUDGETS_READ: 'faction_budgets_read',
   /** Write faction budgets */
-  BUDGETS_WRITE: 'FACTION_BUDGETS_WRITE',
+  BUDGETS_WRITE: 'faction_budgets_write',
   /** Read faction datacards */
-  DATACARDS_READ: 'FACTION_DATACARDS_READ',
+  DATACARDS_READ: 'faction_datacards_read',
   /** Write faction datacards */
-  DATACARDS_WRITE: 'FACTION_DATACARDS_WRITE',
+  DATACARDS_WRITE: 'faction_datacards_write',
   /** All faction permissions */
-  ALL: 'FACTION_ALL',
+  ALL: 'faction_all',
 } as const;
 
 /**
@@ -150,17 +158,17 @@ export const FactionScopes = {
 function generateFactionInventoryScopes(entityType: string, hasRename: boolean = true) {
   const scopes: Record<string, string> = {};
 
-  scopes.READ = `FACTION_INV_${entityType}_READ`;
+  scopes.READ = `faction_inv_${entityType}_read`;
   if (hasRename) {
-    scopes.RENAME = `FACTION_INV_${entityType}_RENAME`;
+    scopes.RENAME = `faction_inv_${entityType}_rename`;
   }
-  scopes.ASSIGN = `FACTION_INV_${entityType}_ASSIGN`;
+  scopes.ASSIGN = `faction_inv_${entityType}_assign`;
   if (hasRename) {
-    scopes.MAKEOVER = `FACTION_INV_${entityType}_MAKEOVER`;
+    scopes.MAKEOVER = `faction_inv_${entityType}_makeover`;
   }
-  scopes.TAGS_READ = `FACTION_INV_${entityType}_TAGS_READ`;
-  scopes.TAGS_WRITE = `FACTION_INV_${entityType}_TAGS_WRITE`;
-  scopes.ALL = `FACTION_INV_${entityType}_ALL`;
+  scopes.TAGS_READ = `faction_inv_${entityType}_tags_read`;
+  scopes.TAGS_WRITE = `faction_inv_${entityType}_tags_write`;
+  scopes.ALL = `faction_inv_${entityType}_all`;
 
   return scopes;
 }
@@ -170,47 +178,55 @@ function generateFactionInventoryScopes(entityType: string, hasRename: boolean =
  */
 export const FactionInventoryScopes = {
   /** Overview of faction inventory */
-  OVERVIEW: 'FACTION_INV_OVERVIEW',
+  OVERVIEW: 'faction_inv_overview',
 
   /** Faction ship scopes */
-  SHIPS: generateFactionInventoryScopes('SHIPS'),
+  SHIPS: generateFactionInventoryScopes('ships'),
 
   /** Faction vehicle scopes */
-  VEHICLES: generateFactionInventoryScopes('VEHICLES'),
+  VEHICLES: generateFactionInventoryScopes('vehicles'),
 
   /** Faction station scopes */
-  STATIONS: generateFactionInventoryScopes('STATIONS'),
+  STATIONS: generateFactionInventoryScopes('stations'),
 
   /** Faction city scopes */
-  CITIES: generateFactionInventoryScopes('CITIES'),
+  CITIES: generateFactionInventoryScopes('cities'),
 
   /** Faction facility scopes */
-  FACILITIES: generateFactionInventoryScopes('FACILITIES'),
+  FACILITIES: generateFactionInventoryScopes('facilities'),
 
   /** Faction planet scopes (no RENAME/MAKEOVER) */
-  PLANETS: generateFactionInventoryScopes('PLANETS', false),
+  PLANETS: generateFactionInventoryScopes('planets', false),
 
   /** Faction item scopes */
-  ITEMS: generateFactionInventoryScopes('ITEMS'),
+  ITEMS: generateFactionInventoryScopes('items'),
 
-  /** Faction NPC scopes (no RENAME) */
-  NPCS: generateFactionInventoryScopes('NPCS', false),
+  /** Faction NPC scopes (has MAKEOVER but no RENAME) */
+  NPCS: {
+    READ: 'faction_inv_npcs_read',
+    ASSIGN: 'faction_inv_npcs_assign',
+    MAKEOVER: 'faction_inv_npcs_makeover',
+    // Note: NPCs do not have RENAME scope
+    TAGS_READ: 'faction_inv_npcs_tags_read',
+    TAGS_WRITE: 'faction_inv_npcs_tags_write',
+    ALL: 'faction_inv_npcs_all',
+  },
 
   /** Faction droid scopes */
-  DROIDS: generateFactionInventoryScopes('DROIDS'),
+  DROIDS: generateFactionInventoryScopes('droids'),
 
   /** Faction material scopes (no ASSIGN) */
   MATERIALS: {
-    READ: 'FACTION_INV_MATERIALS_READ',
-    RENAME: 'FACTION_INV_MATERIALS_RENAME',
-    MAKEOVER: 'FACTION_INV_MATERIALS_MAKEOVER',
-    TAGS_READ: 'FACTION_INV_MATERIALS_TAGS_READ',
-    TAGS_WRITE: 'FACTION_INV_MATERIALS_TAGS_WRITE',
-    ALL: 'FACTION_INV_MATERIALS_ALL',
+    READ: 'faction_inv_materials_read',
+    RENAME: 'faction_inv_materials_rename',
+    MAKEOVER: 'faction_inv_materials_makeover',
+    TAGS_READ: 'faction_inv_materials_tags_read',
+    TAGS_WRITE: 'faction_inv_materials_tags_write',
+    ALL: 'faction_inv_materials_all',
   },
 
   /** Faction creature scopes */
-  CREATURES: generateFactionInventoryScopes('CREATURES'),
+  CREATURES: generateFactionInventoryScopes('creatures'),
 } as const;
 
 /**

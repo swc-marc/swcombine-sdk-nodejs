@@ -4,7 +4,7 @@
 
 import { HttpClient } from '../http/HttpClient.js';
 import { BaseResource } from './BaseResource.js';
-import { NewsItem, GetNewsItemOptions, ListNewsOptions, QueryParams } from '../types/index.js';
+import { NewsItem, GetNewsItemOptions, ListGNSOptions, ListSimNewsOptions, QueryParams } from '../types/index.js';
 
 /**
  * Galactic News Service (GNS) resource
@@ -12,7 +12,13 @@ import { NewsItem, GetNewsItemOptions, ListNewsOptions, QueryParams } from '../t
 export class GNSResource extends BaseResource {
   /**
    * List GNS news items (paginated with optional filtering)
+   * @requires_auth No
    * @param options - Optional category, pagination, and filtering parameters
+   * @param options.category - News category: 'auto', 'economy', 'military', 'political', 'social'
+   * @param options.start_index - Starting position (1-based). Default: 1
+   * @param options.item_count - Number of items to retrieve. Default: 50, Max: 50
+   * @param options.faction - Filter by faction name (GNS only)
+   * @param options.faction_type - Filter by faction type (GNS only)
    * @example
    * const news = await client.news.gns.list();
    * const economyNews = await client.news.gns.list({ category: 'economy' });
@@ -20,7 +26,7 @@ export class GNSResource extends BaseResource {
    * const searchNews = await client.news.gns.list({ search: 'battle', author: 'John Doe' });
    * const factionNews = await client.news.gns.list({ faction: 'Empire', faction_type: 'government' });
    */
-  async list(options?: ListNewsOptions): Promise<NewsItem[]> {
+  async list(options?: ListGNSOptions): Promise<NewsItem[]> {
     const path = options?.category ? `/news/gns/${options.category}` : '/news/gns';
 
     const params: QueryParams = {
@@ -66,14 +72,18 @@ export class GNSResource extends BaseResource {
 export class SimNewsResource extends BaseResource {
   /**
    * List Sim News items (paginated with optional filtering)
+   * @requires_auth No
    * @param options - Optional category, pagination, and filtering parameters
+   * @param options.category - News category: 'player', 'technical', 'community'
+   * @param options.start_index - Starting position (1-based). Default: 1
+   * @param options.item_count - Number of items to retrieve. Default: 50, Max: 50
    * @example
    * const news = await client.news.simNews.list();
    * const playerNews = await client.news.simNews.list({ category: 'player' });
    * const moreNews = await client.news.simNews.list({ start_index: 51, item_count: 50 });
    * const searchNews = await client.news.simNews.list({ search: 'update', author: 'Admin' });
    */
-  async list(options?: ListNewsOptions): Promise<NewsItem[]> {
+  async list(options?: ListSimNewsOptions): Promise<NewsItem[]> {
     const path = options?.category ? `/news/simnews/${options.category}` : '/news/simnews';
 
     const params: QueryParams = {
@@ -93,7 +103,6 @@ export class SimNewsResource extends BaseResource {
     if (options?.author) {
       params.author = options.author;
     }
-    // Note: faction and faction_type are GNS-only parameters, not used for SimNews
 
     const response = await this.http.get<{ newsitem?: NewsItem[]; attributes?: unknown }>(path, { params });
     // API returns { attributes: {...}, newsitem: [...] }, extract just the array

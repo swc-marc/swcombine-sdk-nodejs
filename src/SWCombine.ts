@@ -11,6 +11,7 @@ import {
   OAuthAuthorizationOptions,
   OAuthCallbackQuery,
   AuthorizationResult,
+  RateLimitInfo,
 } from './types/index.js';
 
 // Import all resource classes
@@ -161,5 +162,42 @@ export class SWCombine {
    */
   hasRefreshToken(): boolean {
     return this.tokenManager.hasRefreshToken();
+  }
+
+  /**
+   * Get the current rate limit information.
+   * Returns the last known rate limit info from API response headers.
+   * Returns null if no API calls have been made yet.
+   *
+   * Note: The SW Combine API has a default limit of 600 requests per hour.
+   *
+   * @example
+   * ```typescript
+   * const rateLimit = client.getRateLimitInfo();
+   * if (rateLimit) {
+   *   console.log(`${rateLimit.remaining}/${rateLimit.limit} requests remaining`);
+   *   console.log(`Resets at: ${rateLimit.resetTime}`);
+   * }
+   * ```
+   */
+  getRateLimitInfo(): RateLimitInfo | null {
+    return this.http.getRateLimitInfo();
+  }
+
+  /**
+   * Set a callback to be notified when rate limit info is updated after each API call.
+   * Useful for monitoring rate limit consumption in real-time.
+   *
+   * @example
+   * ```typescript
+   * client.onRateLimitUpdate((info) => {
+   *   if (info.remaining < 100) {
+   *     console.warn(`Warning: Only ${info.remaining} API requests remaining!`);
+   *   }
+   * });
+   * ```
+   */
+  onRateLimitUpdate(callback: (info: RateLimitInfo) => void): void {
+    this.http.setRateLimitCallback(callback);
   }
 }
