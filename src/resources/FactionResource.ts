@@ -4,7 +4,7 @@
 
 import { HttpClient } from '../http/HttpClient.js';
 import { BaseResource } from './BaseResource.js';
-import { Faction, Character, GetFactionOptions } from '../types/index.js';
+import { Faction, Character, GetFactionOptions, CreditLogEntry } from '../types/index.js';
 
 export interface FactionMember {
   character: Character | string;
@@ -29,14 +29,6 @@ export interface Stockholder {
 
 export interface FactionCredits {
   amount: number;
-  [key: string]: unknown;
-}
-
-export interface CreditLogEntry {
-  timestamp: string;
-  amount: number;
-  balance: number;
-  description?: string;
   [key: string]: unknown;
 }
 
