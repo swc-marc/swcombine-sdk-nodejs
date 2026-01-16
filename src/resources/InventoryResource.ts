@@ -4,7 +4,14 @@
 
 import { HttpClient } from '../http/HttpClient.js';
 import { BaseResource } from './BaseResource.js';
-import { Entity, GetEntityOptions, ListInventoryEntitiesOptions, QueryParams } from '../types/index.js';
+import {
+  Entity,
+  GetEntityOptions,
+  InventoryEntityType,
+  InventoryEntityTypeMap,
+  ListInventoryEntitiesOptions,
+  QueryParams,
+} from '../types/index.js';
 
 /**
  * Inventory entities resource
@@ -38,7 +45,9 @@ export class InventoryEntitiesResource extends BaseResource {
    *   filter_inclusion: ['includes', 'includes']
    * });
    */
-  async list(options: ListInventoryEntitiesOptions): Promise<Entity[]> {
+  async list<T extends InventoryEntityType>(
+    options: ListInventoryEntitiesOptions<T>
+  ): Promise<InventoryEntityTypeMap[T][]> {
     const params: QueryParams = {
       start_index: options.start_index || 1,
       item_count: options.item_count || 50,
@@ -64,12 +73,12 @@ export class InventoryEntitiesResource extends BaseResource {
     // it returns the whole object. Extract entities.entity array.
     const entities = response.entities as Record<string, unknown> | undefined;
     if (entities && Array.isArray(entities.entity)) {
-      return entities.entity as Entity[];
+      return entities.entity as InventoryEntityTypeMap[T][];
     }
     // Fallback: look for any array in the response
     for (const key of Object.keys(response)) {
       if (key !== 'attributes' && Array.isArray(response[key])) {
-        return response[key] as Entity[];
+        return response[key] as InventoryEntityTypeMap[T][];
       }
     }
     return [];
