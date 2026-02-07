@@ -250,6 +250,38 @@ export interface GalaxyStationListItem {
   [key: string]: unknown;
 }
 
+export interface GalaxyListAttributes {
+  start?: number;
+  total?: number;
+  count?: number;
+  [key: string]: unknown;
+}
+
+export interface GalaxyPlanetListRawResponse {
+  attributes?: GalaxyListAttributes;
+  planet?: GalaxyPlanetListItem[];
+}
+
+export interface GalaxySectorListRawResponse {
+  attributes?: GalaxyListAttributes;
+  sector?: GalaxySectorListItem[];
+}
+
+export interface GalaxySystemListRawResponse {
+  attributes?: GalaxyListAttributes;
+  system?: GalaxySystemListItem[];
+}
+
+export interface GalaxyStationListRawResponse {
+  attributes?: GalaxyListAttributes;
+  station?: GalaxyStationListItem[];
+}
+
+export interface GalaxyCityListRawResponse {
+  attributes?: GalaxyListAttributes;
+  city?: GalaxyCityListItem[];
+}
+
 export interface GalaxyColour {
   r: number;
   g: number;

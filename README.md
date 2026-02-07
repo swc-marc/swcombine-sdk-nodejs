@@ -264,6 +264,9 @@ const systems = await client.galaxy.systems.list();
 if (systems.length > 0) {
   console.log(systems[0].attributes.uid, systems[0].attributes.name);
 }
+const rawSectors = await client.galaxy.sectors.listRaw({ start_index: 1, item_count: 10 });
+console.log(rawSectors.attributes?.start, rawSectors.attributes?.count, rawSectors.attributes?.total);
+console.log(rawSectors.sector?.[0]?.attributes.name);
 await client.galaxy.systems.get({ uid: '24:123' });
 await client.galaxy.planets.list();
 await client.galaxy.planets.get({ uid: '23:456' });
