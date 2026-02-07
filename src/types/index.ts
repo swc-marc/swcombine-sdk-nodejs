@@ -37,9 +37,9 @@ export enum MessageMode {
 
 export interface ClientConfig {
   /** OAuth client ID */
-  clientId: string;
+  clientId?: string;
   /** OAuth client secret */
-  clientSecret: string;
+  clientSecret?: string;
   /** OAuth redirect URI */
   redirectUri?: string;
   /** Access type: online or offline (offline provides refresh token) */
@@ -995,13 +995,13 @@ export interface ListGNSOptions extends ListNewsOptionsBase {
  * SimNews listing options
  * Uses only base options (no faction filtering)
  */
-export interface ListSimNewsOptions extends ListNewsOptionsBase {}
+export interface ListSimNewsOptions extends ListNewsOptionsBase { }
 
 /**
  * @deprecated Use ListGNSOptions or ListSimNewsOptions instead.
  * This combined type is kept for backwards compatibility.
  */
-export interface ListNewsOptions extends ListGNSOptions {}
+export interface ListNewsOptions extends ListGNSOptions { }
 
 export interface GetEntityOptions {
   entityType: string;

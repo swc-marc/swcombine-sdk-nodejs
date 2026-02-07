@@ -3,6 +3,7 @@
  */
 
 import { OAuthToken } from '../types/index.js';
+import { SWCError } from '../http/errors.js';
 
 export interface TokenStorage {
   /** Save token to storage */
@@ -119,11 +120,15 @@ export class TokenManager {
    */
   async refreshToken(): Promise<void> {
     if (!this.refreshCallback) {
-      throw new Error('Token refresh callback not set');
+      throw new SWCError('Cannot refresh access token: refresh callback is not configured.', {
+        type: 'auth',
+      });
     }
 
     if (!this.hasRefreshToken()) {
-      throw new Error('No refresh token available');
+      throw new SWCError('Cannot refresh access token: no refresh token is available.', {
+        type: 'auth',
+      });
     }
 
     // Call the refresh callback to get new token
