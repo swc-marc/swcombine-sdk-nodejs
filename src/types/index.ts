@@ -37,9 +37,9 @@ export enum MessageMode {
 
 export interface ClientConfig {
   /** OAuth client ID */
-  clientId: string;
+  clientId?: string;
   /** OAuth client secret */
-  clientSecret: string;
+  clientSecret?: string;
   /** OAuth redirect URI */
   redirectUri?: string;
   /** Access type: online or offline (offline provides refresh token) */
@@ -113,6 +113,204 @@ export interface Character {
   credits?: number;
   location?: Location;
   [key: string]: unknown; // Allow for unknown fields
+}
+
+export interface CharacterMeReferenceAttributes {
+  uid?: string;
+  href?: string;
+  type?: string;
+  [key: string]: unknown;
+}
+
+export interface CharacterMeReference {
+  value?: string;
+  attributes?: CharacterMeReferenceAttributes;
+  [key: string]: unknown;
+}
+
+export interface CharacterMeFactionEntry extends CharacterMeReference {
+  primary?: boolean;
+}
+
+export interface CharacterMeLastLogin {
+  years?: number;
+  days?: number;
+  hours?: number;
+  mins?: number;
+  secs?: number;
+  timestamp?: string;
+  [key: string]: unknown;
+}
+
+export interface CharacterMeForceInfo {
+  attributes?: {
+    isAware?: 'true' | 'false';
+    [key: string]: unknown;
+  };
+  [key: string]: unknown;
+}
+
+export interface CharacterMeSkillEntry {
+  attributes?: {
+    type?: string;
+    [key: string]: unknown;
+  };
+  value?: number;
+  [key: string]: unknown;
+}
+
+export interface CharacterMeSkillCategory {
+  attributes?: {
+    force?: 'true' | 'false';
+    count?: number;
+    [key: string]: unknown;
+  };
+  skill?: CharacterMeSkillEntry[];
+  [key: string]: unknown;
+}
+
+export interface CharacterMeSkillsValue {
+  general?: CharacterMeSkillCategory[];
+  space?: CharacterMeSkillCategory[];
+  ground?: CharacterMeSkillCategory[];
+  social?: CharacterMeSkillCategory[];
+  science?: CharacterMeSkillCategory[];
+  light?: CharacterMeSkillCategory[];
+  dark?: CharacterMeSkillCategory[];
+  neutral?: CharacterMeSkillCategory[];
+  [key: string]: CharacterMeSkillCategory[] | undefined;
+}
+
+export interface CharacterMeSkills {
+  attributes?: {
+    href?: string;
+    [key: string]: unknown;
+  };
+  value?: CharacterMeSkillsValue;
+  [key: string]: unknown;
+}
+
+export interface CharacterMePrivilegeEntry {
+  attributes?: {
+    uid?: string;
+    href?: string;
+    [key: string]: unknown;
+  };
+  value?: 'true' | 'false';
+  [key: string]: unknown;
+}
+
+export interface CharacterMePrivilegeGroup {
+  attributes?: {
+    name?: string;
+    count?: number;
+    [key: string]: unknown;
+  };
+  privilege?: CharacterMePrivilegeEntry[];
+  [key: string]: unknown;
+}
+
+export interface CharacterMePrivilegesValue {
+  privilegegroup?: CharacterMePrivilegeGroup[];
+  attributes?: {
+    faction_id?: number;
+    faction_name?: string;
+    count?: number;
+    [key: string]: unknown;
+  };
+  [key: string]: unknown;
+}
+
+export interface CharacterMePrivileges {
+  attributes?: {
+    href?: string;
+    [key: string]: unknown;
+  };
+  value?: CharacterMePrivilegesValue;
+  [key: string]: unknown;
+}
+
+export type CharacterMeCoordinatePoint =
+  | {
+      attributes?: {
+        x?: number | string;
+        y?: number | string;
+        [key: string]: unknown;
+      } | null;
+      [key: string]: unknown;
+    }
+  | Record<string, never>;
+
+export interface CharacterMeCoordinates {
+  galaxy?: CharacterMeCoordinatePoint;
+  system?: CharacterMeCoordinatePoint;
+  surface?: CharacterMeCoordinatePoint;
+  ground?: CharacterMeCoordinatePoint;
+  [key: string]: unknown;
+}
+
+export type CharacterMeLocationNode = CharacterMeReference | Record<string, never>;
+
+export interface CharacterMeLocation {
+  container?: CharacterMeLocationNode;
+  sector?: CharacterMeLocationNode;
+  system?: CharacterMeLocationNode;
+  planet?: CharacterMeLocationNode;
+  city?: CharacterMeLocationNode;
+  coordinates?: CharacterMeCoordinates;
+  [key: string]: unknown;
+}
+
+export interface CharacterMeCredits {
+  attributes?: {
+    href?: string;
+    [key: string]: unknown;
+  };
+  value?: number;
+  [key: string]: unknown;
+}
+
+export interface CharacterMeCreditlog {
+  attributes?: {
+    href?: string;
+    [key: string]: unknown;
+  };
+  [key: string]: unknown;
+}
+
+export interface CharacterMeEvents {
+  attributes?: {
+    href?: string;
+    [key: string]: unknown;
+  };
+  [key: string]: unknown;
+}
+
+export interface CharacterMe {
+  uid: string;
+  name: string;
+  image?: string;
+  attributes?: Record<string, string>;
+  lastlogin?: CharacterMeLastLogin;
+  gender?: string;
+  shortdescription?: string;
+  biography?: string;
+  race?: CharacterMeReference;
+  health?: number;
+  healthMax?: number;
+  xp?: number;
+  xpLevel?: number;
+  force?: CharacterMeForceInfo;
+  faction?: CharacterMeReference;
+  factions?: CharacterMeFactionEntry[];
+  skills?: CharacterMeSkills;
+  inventories?: Record<string, unknown>;
+  privileges?: CharacterMePrivileges;
+  location?: CharacterMeLocation;
+  credits?: CharacterMeCredits;
+  creditlog?: CharacterMeCreditlog;
+  events?: CharacterMeEvents;
+  [key: string]: unknown;
 }
 
 export interface Faction {
@@ -995,13 +1193,13 @@ export interface ListGNSOptions extends ListNewsOptionsBase {
  * SimNews listing options
  * Uses only base options (no faction filtering)
  */
-export interface ListSimNewsOptions extends ListNewsOptionsBase {}
+export interface ListSimNewsOptions extends ListNewsOptionsBase { }
 
 /**
  * @deprecated Use ListGNSOptions or ListSimNewsOptions instead.
  * This combined type is kept for backwards compatibility.
  */
-export interface ListNewsOptions extends ListGNSOptions {}
+export interface ListNewsOptions extends ListGNSOptions { }
 
 export interface GetEntityOptions {
   entityType: string;

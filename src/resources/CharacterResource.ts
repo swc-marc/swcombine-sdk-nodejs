@@ -6,6 +6,7 @@ import { HttpClient } from '../http/HttpClient.js';
 import { BaseResource } from './BaseResource.js';
 import {
   Character,
+  CharacterMe,
   Message,
   CreditLogEntry,
   GetCharacterOptions,
@@ -426,8 +427,8 @@ export class CharacterResource extends BaseResource {
    * @example
    * const myCharacter = await client.character.me();
    */
-  async me(): Promise<Character> {
-    return this.request<Character>('GET', '/character/');
+  async me(): Promise<CharacterMe> {
+    return this.request<CharacterMe>('GET', '/character/');
   }
 
   /**

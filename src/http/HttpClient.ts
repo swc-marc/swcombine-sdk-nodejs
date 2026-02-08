@@ -164,6 +164,9 @@ export class HttpClient {
             // Retry the request with new token
             return this.axios.request(config);
           } catch (refreshError) {
+            if (SWCError.isSWCError(refreshError)) {
+              throw refreshError;
+            }
             // Token refresh failed, throw auth error
             throw SWCError.fromHttpResponse(
               401,

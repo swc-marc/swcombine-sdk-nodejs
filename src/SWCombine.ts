@@ -5,6 +5,7 @@
 import { HttpClient } from './http/HttpClient.js';
 import { OAuthClient } from './auth/OAuthClient.js';
 import { TokenManager } from './auth/TokenManager.js';
+import { SWCError } from './http/errors.js';
 import {
   ClientConfig,
   OAuthToken,
@@ -33,7 +34,7 @@ import { DatacardResource } from './resources/DatacardResource.js';
 export class SWCombine {
   private config: ClientConfig;
   private http: HttpClient;
-  private oauthClient: OAuthClient;
+  private oauthClient?: OAuthClient;
   private tokenManager: TokenManager;
 
   // API resources
@@ -56,27 +57,40 @@ export class SWCombine {
     revokeToken: (refreshToken: string) => Promise<void>;
   };
 
-  constructor(config: ClientConfig) {
+  constructor(config: ClientConfig = {}) {
     this.config = config;
+    const hasClientId = !!config.clientId?.trim();
+    const hasClientSecret = !!config.clientSecret?.trim();
+
+    if (hasClientId !== hasClientSecret) {
+      throw new SWCError('Provide both clientId and clientSecret together, or neither.', {
+        type: 'auth',
+      });
+    }
 
     // Initialize token manager
     this.tokenManager = new TokenManager(config.token);
 
-    // Initialize OAuth client
-    this.oauthClient = new OAuthClient({
-      clientId: config.clientId,
-      clientSecret: config.clientSecret,
-      redirectUri: config.redirectUri,
-      accessType: config.accessType,
-    });
+    // Initialize OAuth client when full OAuth credentials are provided
+    if (hasClientId && hasClientSecret) {
+      this.oauthClient = new OAuthClient({
+        clientId: config.clientId!,
+        clientSecret: config.clientSecret!,
+        redirectUri: config.redirectUri,
+        accessType: config.accessType,
+      });
+    }
 
     // Set up token refresh callback
     this.tokenManager.setRefreshCallback(async () => {
+      const oauthClient = this.requireOAuthCredentials('refresh access tokens');
       const refreshToken = this.tokenManager.getRefreshToken();
       if (!refreshToken) {
-        throw new Error('No refresh token available');
+        throw new SWCError('Cannot refresh access token: no refresh token is available.', {
+          type: 'auth',
+        });
       }
-      return this.oauthClient.refreshToken(refreshToken);
+      return oauthClient.refreshToken(refreshToken);
     });
 
     // Initialize HTTP client
@@ -107,17 +121,20 @@ export class SWCombine {
     // Set up auth operations
     this.auth = {
       getAuthorizationUrl: (options: OAuthAuthorizationOptions) => {
-        return this.oauthClient.getAuthorizationUrl(options);
+        const oauthClient = this.requireOAuthCredentials('generate an authorization URL');
+        return oauthClient.getAuthorizationUrl(options);
       },
       handleCallback: async (query: OAuthCallbackQuery) => {
-        const result = await this.oauthClient.handleCallback(query);
+        const oauthClient = this.requireOAuthCredentials('handle OAuth callbacks');
+        const result = await oauthClient.handleCallback(query);
         if (result.success && result.token) {
           this.tokenManager.setToken(result.token);
         }
         return result;
       },
       revokeToken: async (refreshToken: string) => {
-        return this.oauthClient.revokeToken(refreshToken);
+        const oauthClient = this.requireOAuthCredentials('revoke tokens');
+        return oauthClient.revokeToken(refreshToken);
       },
     };
   }
@@ -147,6 +164,14 @@ export class SWCombine {
    * Manually refresh the token
    */
   async refreshToken(): Promise<void> {
+    this.requireOAuthCredentials('refresh access tokens');
+
+    if (!this.tokenManager.hasRefreshToken()) {
+      throw new SWCError('Cannot refresh access token: no refresh token is available.', {
+        type: 'auth',
+      });
+    }
+
     await this.tokenManager.refreshToken();
   }
 
@@ -199,5 +224,19 @@ export class SWCombine {
    */
   onRateLimitUpdate(callback: (info: RateLimitInfo) => void): void {
     this.http.setRateLimitCallback(callback);
+  }
+
+  /**
+   * Ensure OAuth credentials are configured before running OAuth-only operations.
+   */
+  private requireOAuthCredentials(operation: string): OAuthClient {
+    if (!this.oauthClient) {
+      throw new SWCError(
+        `Cannot ${operation} without OAuth credentials. Initialize SWCombine with both clientId and clientSecret.`,
+        { type: 'auth' }
+      );
+    }
+
+    return this.oauthClient;
   }
 }

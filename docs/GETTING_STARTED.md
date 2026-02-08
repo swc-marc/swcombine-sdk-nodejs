@@ -19,11 +19,21 @@ pnpm add swcombine-sdk
 ```typescript
 import { SWCombine } from 'swcombine-sdk';
 
-const client = new SWCombine({
+// Public mode (no auth)
+const publicClient = new SWCombine();
+
+// Token-only mode
+const tokenClient = new SWCombine({
+  token: 'your-access-token',
+});
+
+// Full OAuth mode
+const fullClient = new SWCombine({
   clientId: 'your-client-id',
   clientSecret: 'your-client-secret',
-  // Optional: provide an access token if you already have one
-  accessToken: 'your-access-token',
+  token: 'your-access-token',
+  redirectUri: 'http://localhost:3000/callback',
+  accessType: 'offline',
 });
 ```
 
@@ -31,7 +41,7 @@ const client = new SWCombine({
 
 ```typescript
 // Get public character information (no auth required)
-const character = await client.character.getByHandle({
+const character = await publicClient.character.getByHandle({
   handle: 'character-handle',
 });
 
@@ -45,9 +55,7 @@ For endpoints requiring authentication, you'll need an access token from OAuth:
 
 ```typescript
 const client = new SWCombine({
-  clientId: 'your-client-id',
-  clientSecret: 'your-client-secret',
-  accessToken: 'your-access-token',
+  token: 'your-access-token',
 });
 
 // Get authenticated character information
@@ -63,13 +71,13 @@ console.log(character.faction);  // { value: "Faction Name", ... }
 
 ```typescript
 interface ClientConfig {
-  // Required OAuth credentials
-  clientId: string;
-  clientSecret: string;
+  // Optional OAuth credentials
+  // If provided, both must be set together
+  clientId?: string;
+  clientSecret?: string;
 
   // Optional authentication
-  accessToken?: string;
-  refreshToken?: string;
+  token?: string | OAuthToken;
 
   // Optional OAuth settings
   redirectUri?: string;
@@ -91,7 +99,7 @@ const client = new SWCombine({
   // OAuth credentials
   clientId: process.env.SWC_CLIENT_ID!,
   clientSecret: process.env.SWC_CLIENT_SECRET!,
-  accessToken: process.env.SWC_ACCESS_TOKEN,
+  token: process.env.SWC_ACCESS_TOKEN,
 
   // OAuth configuration
   redirectUri: 'http://localhost:3000/callback',
@@ -124,9 +132,15 @@ config(); // Load .env
 const client = new SWCombine({
   clientId: process.env.SWC_CLIENT_ID!,
   clientSecret: process.env.SWC_CLIENT_SECRET!,
-  accessToken: process.env.SWC_ACCESS_TOKEN,
+  token: process.env.SWC_ACCESS_TOKEN,
 });
 ```
+
+OAuth-only methods require full OAuth mode (`clientId` + `clientSecret`):
+- `client.auth.getAuthorizationUrl(...)`
+- `client.auth.handleCallback(...)`
+- `client.auth.revokeToken(...)`
+- `client.refreshToken()`
 
 ## Available Resources
 

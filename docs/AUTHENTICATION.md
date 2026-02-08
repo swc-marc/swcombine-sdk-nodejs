@@ -51,6 +51,12 @@ const client = new SWCombine({
 });
 ```
 
+OAuth-only methods require full OAuth mode (`clientId` + `clientSecret`):
+- `client.auth.getAuthorizationUrl(...)`
+- `client.auth.handleCallback(...)`
+- `client.auth.revokeToken(...)`
+- `client.refreshToken()`
+
 ### Step 3: Generate Authorization URL
 
 ```typescript
@@ -115,10 +121,7 @@ app.get('/callback', async (req, res) => {
 ```typescript
 // Create client with access token
 const authenticatedClient = new SWCombine({
-  clientId: 'your-client-id',
-  clientSecret: 'your-client-secret',
-  accessToken: token.accessToken,
-  refreshToken: token.refreshToken,
+  token: token.accessToken,
 });
 
 // Make authenticated requests
@@ -135,15 +138,25 @@ Access tokens typically expire after 1 hour. The SDK automatically refreshes tok
 - A request returns 401 Unauthorized
 - You have provided a refresh token
 
+If you only have a personal access token, pass it as a string:
+
+```typescript
+const tokenOnlyClient = new SWCombine({
+  token: 'my_personal_token',
+});
+```
+
 ```typescript
 const client = new SWCombine({
   clientId: 'your-client-id',
   clientSecret: 'your-client-secret',
-  accessToken: 'your-access-token',
-  refreshToken: 'your-refresh-token', // SDK will use this automatically
+  token: 'your-access-token',
 });
 
-// If the access token expires, SDK will:
+// If you have a full OAuth token (access + refresh), set it:
+client.setToken(token);
+
+// Then if the access token expires, SDK will:
 // 1. Use refresh token to get new access token
 // 2. Retry the failed request
 // 3. Continue working seamlessly
@@ -154,51 +167,27 @@ const client = new SWCombine({
 You can manually refresh a token:
 
 ```typescript
-const newToken = await client.auth.refreshToken();
+await client.refreshToken();
 
-console.log('New Access Token:', newToken.accessToken);
-console.log('Expires At:', new Date(newToken.expiresAt));
-
-// Update your client
-client.updateCredentials({
-  accessToken: newToken.accessToken,
-});
+const refreshedToken = client.getToken();
+console.log('New Access Token:', refreshedToken?.accessToken);
+console.log('Expires At:', refreshedToken ? new Date(refreshedToken.expiresAt) : 'n/a');
 ```
 
-### Custom Token Storage
+### Custom Token Persistence
 
-Implement custom token storage for persistence:
+You can persist tokens with `getToken()` and restore them later with `setToken()`:
 
 ```typescript
-import { TokenStorage } from 'swcombine-sdk';
-
-class DatabaseTokenStorage implements TokenStorage {
-  async getToken() {
-    // Load from database
-    return await db.tokens.findOne({ userId });
-  }
-
-  async setToken(token) {
-    // Save to database
-    await db.tokens.updateOne(
-      { userId },
-      { $set: token },
-      { upsert: true }
-    );
-  }
-
-  async clearToken() {
-    // Remove from database
-    await db.tokens.deleteOne({ userId });
-  }
+const token = client.getToken();
+if (token) {
+  await saveTokenToDatabase(token);
 }
 
-// Use custom storage
-const client = new SWCombine({
-  clientId: 'your-client-id',
-  clientSecret: 'your-client-secret',
-  tokenStorage: new DatabaseTokenStorage(),
-});
+const loadedToken = await loadTokenFromDatabase();
+if (loadedToken) {
+  client.setToken(loadedToken);
+}
 ```
 
 ## OAuth Scopes
@@ -304,8 +293,7 @@ app.get('/dashboard', async (req, res) => {
   const authenticatedClient = new SWCombine({
     clientId: process.env.SWC_CLIENT_ID!,
     clientSecret: process.env.SWC_CLIENT_SECRET!,
-    accessToken: req.session.token.accessToken,
-    refreshToken: req.session.token.refreshToken,
+    token: req.session.token,
   });
 
   // Make authenticated request
@@ -366,8 +354,9 @@ const expiresIn = token.expiresAt - Date.now();
 const refreshIn = expiresIn - (5 * 60 * 1000);
 
 setTimeout(async () => {
-  const newToken = await client.auth.refreshToken();
-  // Update stored token
+  await client.refreshToken();
+  const newToken = client.getToken();
+  // Update stored token if newToken is set
 }, refreshIn);
 ```
 
@@ -396,9 +385,7 @@ Make sure you're passing the access token:
 
 ```typescript
 const client = new SWCombine({
-  clientId: 'your-client-id',
-  clientSecret: 'your-client-secret',
-  accessToken: 'your-access-token', // Don't forget this!
+  token: 'your-access-token', // Don't forget this!
 });
 ```
 

@@ -44,10 +44,21 @@ pnpm add swcombine-sdk
 ```typescript
 import { SWCombine } from 'swcombine-sdk';
 
-const client = new SWCombine({
+// Public mode (no auth)
+const publicClient = new SWCombine();
+
+// Token-only mode (use an existing token)
+const tokenClient = new SWCombine({
+  token: process.env.SWC_ACCESS_TOKEN!,
+});
+
+// Full OAuth mode (required for OAuth flows and token refresh)
+const fullClient = new SWCombine({
   clientId: process.env.SWC_CLIENT_ID!,
   clientSecret: process.env.SWC_CLIENT_SECRET!,
-  token: process.env.SWC_ACCESS_TOKEN, // Optional - can be string or OAuthToken object
+  token: process.env.SWC_ACCESS_TOKEN, // Optional - string or OAuthToken object
+  redirectUri: 'http://localhost:3000/callback',
+  accessType: 'offline',
 });
 ```
 
@@ -55,7 +66,7 @@ const client = new SWCombine({
 
 ```typescript
 // Get public character information (no auth required)
-const character = await client.character.getByHandle({
+const character = await publicClient.character.getByHandle({
   handle: 'character-handle',
 });
 
@@ -68,8 +79,6 @@ console.log(character.name);   // "Character Name"
 ```typescript
 // For authenticated endpoints, provide an access token
 const authenticatedClient = new SWCombine({
-  clientId: process.env.SWC_CLIENT_ID!,
-  clientSecret: process.env.SWC_CLIENT_SECRET!,
   token: process.env.SWC_ACCESS_TOKEN!,
 });
 
@@ -109,6 +118,12 @@ npm run get-token
 ```
 
 ### Manual OAuth Flow
+
+OAuth-only methods require full OAuth mode (`clientId` + `clientSecret`):
+- `client.auth.getAuthorizationUrl(...)`
+- `client.auth.handleCallback(...)`
+- `client.auth.revokeToken(...)`
+- `client.refreshToken()`
 
 ```typescript
 import { SWCombine, CharacterScopes, MessageScopes } from 'swcombine-sdk';
@@ -408,11 +423,12 @@ await client.character.messages.list({
 
 ```typescript
 interface ClientConfig {
-  // Required OAuth credentials
-  clientId: string;
-  clientSecret: string;
+  // Optional OAuth credentials
+  // If provided, both must be set together
+  clientId?: string;
+  clientSecret?: string;
 
-  // Optional authentication - can be access token string or full OAuthToken object
+  // Optional authentication - string or full OAuthToken object
   token?: string | OAuthToken;
 
   // Optional OAuth settings
@@ -445,10 +461,7 @@ See the [examples](examples/) directory for complete working examples:
 ```typescript
 import { SWCombine } from 'swcombine-sdk';
 
-const client = new SWCombine({
-  clientId: process.env.SWC_CLIENT_ID!,
-  clientSecret: process.env.SWC_CLIENT_SECRET!,
-});
+const client = new SWCombine();
 
 // Get character info
 const character = await client.character.getByHandle({
