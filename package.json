@@ -43,6 +43,11 @@
     "typescript"
   ],
   "author": "Dreks Selmur <jonmarkgo@gmail.com>",
+  "contributors": [
+    {
+      "name": "swc-marc"
+    }
+  ],
   "license": "MIT",
   "repository": {
     "type": "git",
