@@ -208,6 +208,29 @@ await client.api.time({ cgt: 'Y26D100' }); // CGT to Unix timestamp
 await client.api.time({ time: 1701432000 }); // Unix timestamp to CGT
 ```
 
+### Timestamp Utility (CGT)
+
+```typescript
+import { Timestamp } from 'swcombine-sdk';
+
+// Get current CGT
+const now = Timestamp.now();
+
+// Create from Unix timestamp (seconds or milliseconds)
+const fromUnix = Timestamp.fromUnixTimestamp(1701432000);
+
+// Create from Date
+const fromDate = Timestamp.fromDate(new Date('2025-01-01T00:00:00Z'));
+
+// Add or subtract CGT duration
+const plus = fromUnix.add({ days: 2, hours: 3 });
+const minus = fromUnix.subtract({ minutes: 30 });
+
+// Format output
+now.toString('full'); // "Year 27 Day 134, 8:45:23"
+now.toString('{hms} on Day {d} of Year {y}'); // "08:45:23 on Day 134 of Year 27"
+```
+
 ### Characters
 
 ```typescript

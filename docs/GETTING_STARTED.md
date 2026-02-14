@@ -250,6 +250,21 @@ await client.api.rateLimits();
 await client.api.time();
 ```
 
+### Timestamp Utility (CGT)
+```typescript
+import { Timestamp } from 'swcombine-sdk';
+
+const now = Timestamp.now();
+const fromUnix = Timestamp.fromUnixTimestamp(1701432000);
+const fromDate = Timestamp.fromDate(new Date('2025-01-01T00:00:00Z'));
+
+const plus = fromUnix.add({ days: 2, hours: 3 });
+const minus = fromUnix.subtract({ minutes: 30 });
+
+console.log(now.toString('full'));
+console.log(now.toString('{hms} on Day {d} of Year {y}'));
+```
+
 ## Error Handling
 
 The SDK throws typed errors that you can catch and handle:

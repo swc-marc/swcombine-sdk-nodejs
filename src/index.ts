@@ -9,6 +9,9 @@ export { SWCombine } from './SWCombine.js';
 // Error handling
 export { SWCError } from './http/errors.js';
 
+// Utilities
+export { Timestamp } from './Timestamp.js';
+
 // Types
 export * from './types/index.js';
 

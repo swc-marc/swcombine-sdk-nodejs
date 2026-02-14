@@ -12,6 +12,54 @@
  */
 export type QueryParams = Record<string, string | number | boolean | string[] | number[] | undefined>;
 
+/**
+ * Represents a moment in Combine Galactic Time
+ */
+export interface TimestampMoment {
+  /** Year in CGT */
+  year: number;
+  /** Day of the year (1-365) */
+  day: number;
+  /** Hour of the day (0-23) */
+  hour?: number;
+  /** Minute of the hour (0-59) */
+  minute?: number;
+  /** Second of the minute (0-59) */
+  second?: number;
+}
+
+/**
+ * Duration between two timestamps
+ */
+export interface Duration {
+  /** Number of years */
+  years: number;
+  /** Number of days */
+  days: number;
+  /** Number of hours */
+  hours: number;
+  /** Number of minutes */
+  minutes: number;
+  /** Number of seconds */
+  seconds: number;
+}
+
+/**
+ * Timestamp format presets
+ */
+export type TimestampFormat =
+  | 'full' // Year 25 Day 60, 6:03:12
+  | 'minute' // Year 25 Day 60, 6:03
+  | 'day' // Year 25 Day 60
+  | 'shortFull' // Y25 D60, 6:03:12
+  | 'shortMinute' // Y25 D60, 6:03
+  | 'shortDay'; // Y25 D60
+
+/**
+ * Unix timestamp units
+ */
+export type TimestampUnit = 'sec' | 'ms' | 'seconds' | 'milliseconds';
+
 // ============================================================================
 // Enums
 // ============================================================================
