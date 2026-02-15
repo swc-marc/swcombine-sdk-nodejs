@@ -1,6 +1,6 @@
 {
   "name": "swcombine-sdk",
-  "version": "1.7.0",
+  "version": "2.0.0",
   "description": "Comprehensive TypeScript SDK for Star Wars Combine API v2.0",
   "main": "./dist/cjs/index.js",
   "module": "./dist/esm/index.js",
@@ -67,7 +67,7 @@
   "bugs": {
     "url": "https://github.com/jonmarkgo/swcombine-sdk-nodejs/issues"
   },
-  "homepage": "https://github.com/jonmarkgo/swcombine-sdk-nodejs#readme",
+  "homepage": "https://jonmarkgo.github.io/swcombine-sdk-nodejs/",
   "engines": {
     "node": ">=18.0.0"
   },
@@ -86,6 +86,7 @@
     "ts-node": "^10.9.2",
     "tsx": "^4.20.6",
     "typedoc": "^0.28.17",
+    "typedoc-plugin-llms-txt": "^0.1.2",
     "typedoc-plugin-markdown": "^4.10.0",
     "typescript": "^5.5.0",
     "vitest": "^1.6.0"

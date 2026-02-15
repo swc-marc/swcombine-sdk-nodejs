@@ -15,6 +15,8 @@ import {
 
 /**
  * Inventory entities resource
+ *
+ * @see https://www.swcombine.com/ws/v2.0/documentation/inventory/uid/entity_type/assign_type/ SW Combine API Documentation
  */
 export class InventoryEntitiesResource extends BaseResource {
   /**
@@ -160,6 +162,8 @@ export class InventoryEntitiesResource extends BaseResource {
 
 /**
  * Inventory resource for managing inventories
+ *
+ * @see https://www.swcombine.com/ws/v2.0/documentation/inventory/uid/ SW Combine API Documentation
  */
 export class InventoryResource extends BaseResource {
   public readonly entities: InventoryEntitiesResource;

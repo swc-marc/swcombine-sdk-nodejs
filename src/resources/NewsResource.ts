@@ -8,6 +8,8 @@ import { NewsItem, GetNewsItemOptions, ListGNSOptions, ListSimNewsOptions, Query
 
 /**
  * Galactic News Service (GNS) resource
+ *
+ * @see https://www.swcombine.com/ws/v2.0/documentation/news/gns/category/ SW Combine API Documentation
  */
 export class GNSResource extends BaseResource {
   /**
@@ -68,6 +70,8 @@ export class GNSResource extends BaseResource {
 
 /**
  * Sim News resource
+ *
+ * @see https://www.swcombine.com/ws/v2.0/documentation/news/simnews/category/ SW Combine API Documentation
  */
 export class SimNewsResource extends BaseResource {
   /**
@@ -119,6 +123,8 @@ export class SimNewsResource extends BaseResource {
 
 /**
  * News resource for accessing news feeds
+ *
+ * @see https://www.swcombine.com/ws/v2.0/documentation/news/gns/category/ SW Combine API Documentation
  */
 export class NewsResource extends BaseResource {
   public readonly gns: GNSResource;

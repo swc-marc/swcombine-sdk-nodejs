@@ -187,214 +187,25 @@ See [OAuth Scopes Guide](docs/SCOPES.md) for all 170+ available scopes.
 
 ## API Resources
 
-The SDK provides access to all SW Combine API resources:
+The SDK provides access to all SW Combine API v2.0 resources through a fluent, type-safe interface:
 
-### API Utilities
+| Resource | Access | Description |
+|---|---|---|
+| [`client.api`](https://jonmarkgo.github.io/swcombine-sdk-nodejs/classes/resources_ApiResource.ApiResource.html) | Utilities | Hello world, permissions, rate limits, time conversion |
+| [`client.character`](https://jonmarkgo.github.io/swcombine-sdk-nodejs/classes/resources_CharacterResource.CharacterResource.html) | Characters | Profile, [messages](https://jonmarkgo.github.io/swcombine-sdk-nodejs/classes/resources_CharacterResource.CharacterMessagesResource.html), [skills](https://jonmarkgo.github.io/swcombine-sdk-nodejs/classes/resources_CharacterResource.CharacterSkillsResource.html), [privileges](https://jonmarkgo.github.io/swcombine-sdk-nodejs/classes/resources_CharacterResource.CharacterPrivilegesResource.html), [credits](https://jonmarkgo.github.io/swcombine-sdk-nodejs/classes/resources_CharacterResource.CharacterCreditsResource.html), [credit log](https://jonmarkgo.github.io/swcombine-sdk-nodejs/classes/resources_CharacterResource.CharacterCreditlogResource.html) |
+| [`client.faction`](https://jonmarkgo.github.io/swcombine-sdk-nodejs/classes/resources_FactionResource.FactionResource.html) | Factions | Info, [members](https://jonmarkgo.github.io/swcombine-sdk-nodejs/classes/resources_FactionResource.FactionMembersResource.html), [budgets](https://jonmarkgo.github.io/swcombine-sdk-nodejs/classes/resources_FactionResource.FactionBudgetsResource.html), [stockholders](https://jonmarkgo.github.io/swcombine-sdk-nodejs/classes/resources_FactionResource.FactionStockholdersResource.html), [credits](https://jonmarkgo.github.io/swcombine-sdk-nodejs/classes/resources_FactionResource.FactionCreditsResource.html), [credit log](https://jonmarkgo.github.io/swcombine-sdk-nodejs/classes/resources_FactionResource.FactionCreditlogResource.html) |
+| [`client.galaxy`](https://jonmarkgo.github.io/swcombine-sdk-nodejs/classes/resources_GalaxyResource.GalaxyResource.html) | Galaxy | [Systems](https://jonmarkgo.github.io/swcombine-sdk-nodejs/classes/resources_GalaxyResource.GalaxySystemsResource.html), [sectors](https://jonmarkgo.github.io/swcombine-sdk-nodejs/classes/resources_GalaxyResource.GalaxySectorsResource.html), [planets](https://jonmarkgo.github.io/swcombine-sdk-nodejs/classes/resources_GalaxyResource.GalaxyPlanetsResource.html), [stations](https://jonmarkgo.github.io/swcombine-sdk-nodejs/classes/resources_GalaxyResource.GalaxyStationsResource.html), [cities](https://jonmarkgo.github.io/swcombine-sdk-nodejs/classes/resources_GalaxyResource.GalaxyCitiesResource.html) |
+| [`client.inventory`](https://jonmarkgo.github.io/swcombine-sdk-nodejs/classes/resources_InventoryResource.InventoryResource.html) | Inventory | [Entity listing](https://jonmarkgo.github.io/swcombine-sdk-nodejs/classes/resources_InventoryResource.InventoryEntitiesResource.html), management, tagging |
+| [`client.market`](https://jonmarkgo.github.io/swcombine-sdk-nodejs/classes/resources_MarketResource.MarketResource.html) | Market | [Vendor listings](https://jonmarkgo.github.io/swcombine-sdk-nodejs/classes/resources_MarketResource.MarketVendorsResource.html) |
+| [`client.news`](https://jonmarkgo.github.io/swcombine-sdk-nodejs/classes/resources_NewsResource.NewsResource.html) | News | [GNS](https://jonmarkgo.github.io/swcombine-sdk-nodejs/classes/resources_NewsResource.GNSResource.html) and [Sim News](https://jonmarkgo.github.io/swcombine-sdk-nodejs/classes/resources_NewsResource.SimNewsResource.html) feeds |
+| [`client.types`](https://jonmarkgo.github.io/swcombine-sdk-nodejs/classes/resources_TypesResource.TypesResource.html) | Types | [Entity types](https://jonmarkgo.github.io/swcombine-sdk-nodejs/classes/resources_TypesResource.TypesEntitiesResource.html), [classes](https://jonmarkgo.github.io/swcombine-sdk-nodejs/classes/resources_TypesResource.TypesClassesResource.html), and detailed type info |
+| [`client.events`](https://jonmarkgo.github.io/swcombine-sdk-nodejs/classes/resources_EventsResource.EventsResource.html) | Events | Personal, faction, inventory, and combat events |
+| [`client.location`](https://jonmarkgo.github.io/swcombine-sdk-nodejs/classes/resources_LocationResource.LocationResource.html) | Location | Entity location lookups |
+| [`client.datacard`](https://jonmarkgo.github.io/swcombine-sdk-nodejs/classes/resources_DatacardResource.DatacardResource.html) | Datacards | Datacard management and assignment |
 
-```typescript
-// Get list of available API resources
-await client.api.getResources();
+Also includes a [`Timestamp`](https://jonmarkgo.github.io/swcombine-sdk-nodejs/classes/Timestamp.Timestamp.html) utility for Combine Galactic Time (CGT) conversion and formatting.
 
-// Test connectivity
-await client.api.helloWorld();
-await client.api.helloAuth(); // Requires authentication
-
-// Get available permissions and rate limits
-await client.api.permissions();
-await client.api.rateLimits();
-
-// Time conversion (CGT = Combine Galactic Time)
-await client.api.time(); // Current time: { years, days, hours, mins, secs }
-await client.api.time({ cgt: 'Y26D100' }); // CGT to Unix timestamp
-await client.api.time({ time: 1701432000 }); // Unix timestamp to CGT
-```
-
-### Timestamp Utility (CGT)
-
-```typescript
-import { Timestamp } from 'swcombine-sdk';
-
-// Get current CGT
-const now = Timestamp.now();
-
-// Create from Unix timestamp (seconds or milliseconds)
-const fromUnix = Timestamp.fromUnixTimestamp(1701432000);
-
-// Create from Date
-const fromDate = Timestamp.fromDate(new Date('2025-01-01T00:00:00Z'));
-
-// Add or subtract CGT duration
-const plus = fromUnix.add({ days: 2, hours: 3 });
-const minus = fromUnix.subtract({ minutes: 30 });
-
-// Format output
-now.toString('full'); // "Year 27 Day 134, 8:45:23"
-now.toString('{hms} on Day {d} of Year {y}'); // "08:45:23 on Day 134 of Year 27"
-```
-
-### Characters
-
-```typescript
-// Public endpoints
-await client.character.getByHandle({ handle: 'character-handle' });
-
-// Authenticated endpoints
-await client.character.me(); // Get authenticated user's character
-await client.character.get({ uid: '1:12345' });
-await client.character.skills.list({ uid: '1:12345' });
-await client.character.privileges.list({ uid: '1:12345' });
-await client.character.privileges.get({ uid: '1:12345', privilegeGroup: 'group', privilege: 'name' });
-await client.character.credits.get({ uid: '1:12345' }); // Returns credit balance as number
-await client.character.credits.transfer({ uid: '1:12345', amount: 1000, recipient: '1:67890' });
-await client.character.creditlog.list({ uid: '1:12345' });
-await client.character.permissions.list({ uid: '1:12345' });
-await client.character.hasPermission({ uid: '1:12345', permission: 'CHARACTER_READ' });
-
-// Messages
-await client.character.messages.list({ uid: '1:12345' }); // All messages (sent + received)
-await client.character.messages.list({ uid: '1:12345', mode: 'received' }); // Only received
-await client.character.messages.list({ uid: '1:12345', mode: 'sent' }); // Only sent
-await client.character.messages.get({ uid: '1:12345', messageId: 'msg-123' });
-await client.character.messages.create({ uid: '1:12345', receivers: 'recipient1;recipient2', communication: 'Hello!' });
-await client.character.messages.delete({ uid: '1:12345', messageId: 'msg-123' });
-```
-
-### Factions
-
-```typescript
-await client.faction.list();
-await client.faction.get({ uid: '20:123' });
-await client.faction.members.list({ factionId: '20:123' });
-await client.faction.budgets.list({ factionId: '20:123' });
-await client.faction.budgets.get({ factionId: '20:123', budgetId: 'budget-uid' });
-await client.faction.stockholders.list({ factionId: '20:123' });
-await client.faction.credits.get({ factionId: '20:123' });
-await client.faction.credits.update({ factionId: '20:123', amount: 1000, recipient: '1:12345' });
-await client.faction.creditlog.list({ factionId: '20:123' });
-```
-
-### Inventory
-
-```typescript
-await client.inventory.get({ uid: '1:12345' });
-await client.inventory.entities.list({
-  uid: '1:12345',
-  entityType: 'ships', // ships, vehicles, stations, cities, facilities, planets, items, npcs, droids, creatures, materials
-  assignType: 'owner', // owner, commander, pilot
-});
-await client.inventory.entities.get({ entityType: 'ships', uid: '5:12345' });
-
-// Entity management
-await client.inventory.entities.updateProperty({
-  entityType: 'ships',
-  uid: '5:12345',
-  property: 'name', // name, owner, commander, pilot, infotext, etc.
-  new_value: 'New Ship Name',
-});
-await client.inventory.entities.addTag({ entityType: 'ships', uid: '5:12345', tag: 'favorite' });
-await client.inventory.entities.removeTag({ entityType: 'ships', uid: '5:12345', tag: 'favorite' });
-```
-
-### Galaxy
-
-```typescript
-// Systems, planets, sectors
-const systems = await client.galaxy.systems.list();
-if (systems.length > 0) {
-  console.log(systems[0].attributes.uid, systems[0].attributes.name);
-}
-const rawSectors = await client.galaxy.sectors.listRaw({ start_index: 1, item_count: 10 });
-console.log(rawSectors.attributes?.start, rawSectors.attributes?.count, rawSectors.attributes?.total);
-console.log(rawSectors.sector?.[0]?.attributes.name);
-await client.galaxy.systems.get({ uid: '24:123' });
-await client.galaxy.planets.list();
-await client.galaxy.planets.get({ uid: '23:456' });
-await client.galaxy.sectors.list();
-await client.galaxy.sectors.get({ uid: 'seswenna' }); // Use lowercase sector name
-
-// Stations and cities
-await client.galaxy.stations.list();
-await client.galaxy.stations.get({ uid: '6:789' });
-await client.galaxy.cities.list();
-await client.galaxy.cities.get({ uid: '22:101' });
-```
-
-### Events
-
-```typescript
-// Note: Events uses 0-based indexing unlike other endpoints
-await client.events.list({ eventMode: 'personal' }); // personal, faction, inventory, combat
-await client.events.list({ eventMode: 'personal', start_index: 0, item_count: 100 }); // omit eventType to get all
-await client.events.list({ eventMode: 'personal', eventType: 'xp' }); // filter by specific type
-await client.events.get({ uid: 'event-uid' });
-```
-
-### Location
-
-```typescript
-await client.location.get({ entityType: 'characters', uid: '1:12345' });
-await client.location.get({ entityType: 'ships', uid: '5:12345' });
-```
-
-### Datacards
-
-```typescript
-await client.datacard.list({ factionId: '20:123' });
-await client.datacard.get({ uid: 'datacard-uid' });
-await client.datacard.create({ uid: 'datacard-uid', production_entity_uid: '6:789', uses: 10 });
-await client.datacard.delete({ uid: 'datacard-uid', production_entity_uid: '6:789' });
-```
-
-### Market
-
-```typescript
-await client.market.vendors.list();
-await client.market.vendors.get({ uid: 'vendor-uid' });
-```
-
-### News
-
-```typescript
-// Galactic News Service (GNS)
-await client.news.gns.list();
-await client.news.gns.list({ category: 'economy', search: 'battle', author: 'John Doe', faction: 'Empire' });
-await client.news.gns.get({ id: 'news-id' });
-
-// Sim News
-await client.news.simNews.list();
-await client.news.simNews.list({ category: 'player' });
-await client.news.simNews.get({ id: 'news-id' });
-```
-
-### Types
-
-```typescript
-// List all entity types
-await client.types.listEntityTypes();
-
-// Get entity classes for a specific type
-await client.types.classes.list({ entityType: 'vehicles' });
-await client.types.classes.list({ entityType: 'ships' });
-
-// Get entities by type
-await client.types.entities.list({ entityType: 'ships' });
-await client.types.entities.list({ entityType: 'ships', class: 'fighter' });
-await client.types.entities.get({ entityType: 'ships', uid: 'type-uid' });
-
-// Get entities by type with pagination metadata
-const rawVehicles = await client.types.entities.listRaw({
-  entityType: 'vehicles',
-  start_index: 1,
-  item_count: 50,
-});
-
-// listRaw() is normalized for all entity types:
-// { attributes?: { start, total, count }, items: TypesEntityListItem[] }
-console.log(rawVehicles.attributes?.start, rawVehicles.attributes?.count, rawVehicles.attributes?.total);
-console.log(rawVehicles.items[0]?.attributes.uid, rawVehicles.items[0]?.value);
-```
-
-See [API Documentation](docs/api/README.md) for complete reference (run `npm run docs:api` to generate).
+For complete method signatures, parameters, and examples, see the **[API Reference Documentation](https://jonmarkgo.github.io/swcombine-sdk-nodejs/)**.
 
 ## Rate Limiting
 
@@ -536,10 +347,10 @@ npm run test:integration
 
 ## Documentation
 
+- **[API Reference](https://jonmarkgo.github.io/swcombine-sdk-nodejs/)** - Full API reference with all methods, parameters, and examples
 - **[Getting Started Guide](docs/GETTING_STARTED.md)** - Detailed setup and usage
 - **[Authentication Guide](docs/AUTHENTICATION.md)** - OAuth 2.0 setup and token management
 - **[OAuth Scopes Reference](docs/SCOPES.md)** - Complete scope documentation
-- **[API Reference](docs/api/README.md)** - Detailed API endpoint documentation (run `npm run docs:api` to generate)
 - **[Getting an OAuth Token](docs/getting-oauth-token.md)** - Step-by-step token guide
 - **[Local Development](docs/LOCAL_DEVELOPMENT.md)** - Development environment setup
 - **[Publishing](docs/PUBLISHING.md)** - NPM publishing guide
@@ -584,7 +395,8 @@ npm run format
 
 ## Links
 
-- [SW Combine API Documentation](https://www.swcombine.com/ws/developers/)
+- [SDK API Reference](https://jonmarkgo.github.io/swcombine-sdk-nodejs/) - Full TypeDoc-generated documentation
+- [SW Combine API Documentation](https://www.swcombine.com/ws/developers/) - Official API docs
 - [npm Package](https://www.npmjs.com/package/swcombine-sdk)
 - [GitHub Repository](https://github.com/jonmarkgo/swcombine-sdk-nodejs)
 

@@ -69,6 +69,8 @@ export interface ResourceInfo {
 
 /**
  * API resource for utility endpoints
+ *
+ * @see https://www.swcombine.com/ws/v2.0/documentation/api/helloworld/ SW Combine API Documentation
  */
 export class ApiResource extends BaseResource {
   /**

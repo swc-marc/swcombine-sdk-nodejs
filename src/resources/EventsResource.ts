@@ -7,6 +7,8 @@ import { Event, QueryParams } from '../types/index.js';
 
 /**
  * Events resource for querying events
+ *
+ * @see https://www.swcombine.com/ws/v2.0/documentation/events/event_mode/event_type/ SW Combine API Documentation
  */
 export class EventsResource extends BaseResource {
   /**

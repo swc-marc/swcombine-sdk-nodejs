@@ -38,6 +38,8 @@ export interface EntityClass {
 
 /**
  * Entity classes resource
+ *
+ * @see https://www.swcombine.com/ws/v2.0/documentation/types/classes/entity_type/ SW Combine API Documentation
  */
 export class TypesClassesResource extends BaseResource {
   /**
@@ -83,6 +85,8 @@ export class TypesClassesResource extends BaseResource {
 
 /**
  * Entities by type resource
+ *
+ * @see https://www.swcombine.com/ws/v2.0/documentation/types/entity_type/ SW Combine API Documentation
  */
 export class TypesEntitiesResource extends BaseResource {
   /**
@@ -272,6 +276,8 @@ export class TypesEntitiesResource extends BaseResource {
 
 /**
  * Types resource for accessing type information
+ *
+ * @see https://www.swcombine.com/ws/v2.0/documentation/types/entitytypes/ SW Combine API Documentation
  */
 export class TypesResource extends BaseResource {
   public readonly classes: TypesClassesResource;

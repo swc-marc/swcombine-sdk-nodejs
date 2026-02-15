@@ -28,6 +28,8 @@ import {
 
 /**
  * Character messages resource
+ *
+ * @see https://www.swcombine.com/ws/v2.0/documentation/character/uid/messages/mode/ SW Combine API Documentation
  */
 export class CharacterMessagesResource extends BaseResource {
   /**
@@ -136,6 +138,8 @@ export interface CharacterSkills {
 
 /**
  * Character skills resource
+ *
+ * @see https://www.swcombine.com/ws/v2.0/documentation/character/uid/skills/ SW Combine API Documentation
  */
 export class CharacterSkillsResource extends BaseResource {
   /**
@@ -188,6 +192,8 @@ export interface PrivilegesResponse {
 
 /**
  * Character privileges resource
+ *
+ * @see https://www.swcombine.com/ws/v2.0/documentation/character/uid/privileges/ SW Combine API Documentation
  */
 export class CharacterPrivilegesResource extends BaseResource {
   /**
@@ -274,6 +280,8 @@ export class CharacterPrivilegesResource extends BaseResource {
 
 /**
  * Character credits resource
+ *
+ * @see https://www.swcombine.com/ws/v2.0/documentation/character/uid/credits/ SW Combine API Documentation
  */
 export class CharacterCreditsResource extends BaseResource {
   /**
@@ -319,6 +327,8 @@ export class CharacterCreditsResource extends BaseResource {
 
 /**
  * Character credit log resource
+ *
+ * @see https://www.swcombine.com/ws/v2.0/documentation/character/uid/creditlog/ SW Combine API Documentation
  */
 export class CharacterCreditlogResource extends BaseResource {
   /**
@@ -374,6 +384,8 @@ export interface CharacterPermissionsResponse {
 
 /**
  * Character permissions resource
+ *
+ * @see https://www.swcombine.com/ws/v2.0/documentation/character/uid/permissions/ SW Combine API Documentation
  */
 export class CharacterPermissionsResource extends BaseResource {
   /**
@@ -400,6 +412,8 @@ export class CharacterPermissionsResource extends BaseResource {
 
 /**
  * Character resource for managing characters
+ *
+ * @see https://www.swcombine.com/ws/v2.0/documentation/character/uid/ SW Combine API Documentation
  */
 export class CharacterResource extends BaseResource {
   public readonly messages: CharacterMessagesResource;

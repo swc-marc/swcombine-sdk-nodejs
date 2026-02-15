@@ -13,6 +13,8 @@ export interface Datacard {
 
 /**
  * Datacard resource for managing datacards
+ *
+ * @see https://www.swcombine.com/ws/v2.0/documentation/datacard/uid/ SW Combine API Documentation
  */
 export class DatacardResource extends BaseResource {
   /**

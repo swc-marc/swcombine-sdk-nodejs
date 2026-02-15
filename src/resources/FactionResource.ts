@@ -34,6 +34,8 @@ export interface FactionCredits {
 
 /**
  * Faction members resource
+ *
+ * @see https://www.swcombine.com/ws/v2.0/documentation/faction/fuid/members/ SW Combine API Documentation
  */
 export class FactionMembersResource extends BaseResource {
   /**
@@ -84,6 +86,8 @@ export class FactionMembersResource extends BaseResource {
 
 /**
  * Faction budgets resource
+ *
+ * @see https://www.swcombine.com/ws/v2.0/documentation/faction/uid/budgets/ SW Combine API Documentation
  */
 export class FactionBudgetsResource extends BaseResource {
   /**
@@ -117,6 +121,8 @@ export class FactionBudgetsResource extends BaseResource {
 
 /**
  * Faction stockholders resource
+ *
+ * @see https://www.swcombine.com/ws/v2.0/documentation/faction/uid/stockholders/ SW Combine API Documentation
  */
 export class FactionStockholdersResource extends BaseResource {
   /**
@@ -143,6 +149,8 @@ export class FactionStockholdersResource extends BaseResource {
 
 /**
  * Faction credits resource
+ *
+ * @see https://www.swcombine.com/ws/v2.0/documentation/faction/uid/credits/ SW Combine API Documentation
  */
 export class FactionCreditsResource extends BaseResource {
   /**
@@ -187,6 +195,8 @@ export class FactionCreditsResource extends BaseResource {
 
 /**
  * Faction credit log resource
+ *
+ * @see https://www.swcombine.com/ws/v2.0/documentation/faction/uid/creditlog/ SW Combine API Documentation
  */
 export class FactionCreditlogResource extends BaseResource {
   /**
@@ -229,6 +239,8 @@ export class FactionCreditlogResource extends BaseResource {
 
 /**
  * Faction resource for managing factions
+ *
+ * @see https://www.swcombine.com/ws/v2.0/documentation/faction/uid/ SW Combine API Documentation
  */
 export class FactionResource extends BaseResource {
   public readonly members: FactionMembersResource;

@@ -12,5 +12,6 @@
     "includeCategories": true,
     "includeGroups": true
   },
-  "categorizeByGroup": true
+  "categorizeByGroup": true,
+  "plugin": ["typedoc-plugin-llms-txt"]
 }

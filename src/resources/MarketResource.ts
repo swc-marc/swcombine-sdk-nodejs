@@ -8,6 +8,8 @@ import { Vendor, GetVendorOptions } from '../types/index.js';
 
 /**
  * Market vendors resource
+ *
+ * @see https://www.swcombine.com/ws/v2.0/documentation/market/vendors/ SW Combine API Documentation
  */
 export class MarketVendorsResource extends BaseResource {
   /**
@@ -37,6 +39,8 @@ export class MarketVendorsResource extends BaseResource {
 
 /**
  * Market resource for accessing market data
+ *
+ * @see https://www.swcombine.com/ws/v2.0/documentation/market/vendors/ SW Combine API Documentation
  */
 export class MarketResource extends BaseResource {
   public readonly vendors: MarketVendorsResource;

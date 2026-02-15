@@ -29,6 +29,8 @@ import {
 
 /**
  * Galaxy planets resource
+ *
+ * @see https://www.swcombine.com/ws/v2.0/documentation/galaxy/planets/ SW Combine API Documentation
  */
 export class GalaxyPlanetsResource extends BaseResource {
   async listRaw(options?: { start_index?: number; item_count?: number }): Promise<GalaxyPlanetListRawResponse> {
@@ -62,6 +64,8 @@ export class GalaxyPlanetsResource extends BaseResource {
 
 /**
  * Galaxy sectors resource
+ *
+ * @see https://www.swcombine.com/ws/v2.0/documentation/galaxy/sectors/ SW Combine API Documentation
  */
 export class GalaxySectorsResource extends BaseResource {
   async listRaw(options?: { start_index?: number; item_count?: number }): Promise<GalaxySectorListRawResponse> {
@@ -98,6 +102,8 @@ export class GalaxySectorsResource extends BaseResource {
 
 /**
  * Galaxy systems resource
+ *
+ * @see https://www.swcombine.com/ws/v2.0/documentation/galaxy/systems/ SW Combine API Documentation
  */
 export class GalaxySystemsResource extends BaseResource {
   async listRaw(options?: { start_index?: number; item_count?: number }): Promise<GalaxySystemListRawResponse> {
@@ -131,6 +137,8 @@ export class GalaxySystemsResource extends BaseResource {
 
 /**
  * Galaxy stations resource
+ *
+ * @see https://www.swcombine.com/ws/v2.0/documentation/galaxy/stations/ SW Combine API Documentation
  */
 export class GalaxyStationsResource extends BaseResource {
   async listRaw(options?: { start_index?: number; item_count?: number }): Promise<GalaxyStationListRawResponse> {
@@ -164,6 +172,8 @@ export class GalaxyStationsResource extends BaseResource {
 
 /**
  * Galaxy cities resource
+ *
+ * @see https://www.swcombine.com/ws/v2.0/documentation/galaxy/cities/ SW Combine API Documentation
  */
 export class GalaxyCitiesResource extends BaseResource {
   async listRaw(options?: { start_index?: number; item_count?: number }): Promise<GalaxyCityListRawResponse> {
@@ -197,6 +207,8 @@ export class GalaxyCitiesResource extends BaseResource {
 
 /**
  * Galaxy resource for accessing galactic information
+ *
+ * @see https://www.swcombine.com/ws/v2.0/documentation/galaxy/systems/ SW Combine API Documentation
  */
 export class GalaxyResource extends BaseResource {
   public readonly planets: GalaxyPlanetsResource;
