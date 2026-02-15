@@ -10,7 +10,10 @@
  * Type for query parameters (for pagination, filtering, etc.)
  * Supports primitive values and arrays for filtering
  */
-export type QueryParams = Record<string, string | number | boolean | string[] | number[] | undefined>;
+export type QueryParams = Record<
+  string,
+  string | number | boolean | string[] | number[] | undefined
+>;
 
 /**
  * Represents a moment in Combine Galactic Time
@@ -1097,6 +1100,830 @@ export interface InventoryEntityTypeMap {
 }
 
 // ============================================================================
+// Types Resource Types
+// ============================================================================
+
+/**
+ * Valid entity types for /types endpoints.
+ */
+export type TypesEntityType =
+  | 'ships'
+  | 'vehicles'
+  | 'stations'
+  | 'facilities'
+  | 'items'
+  | 'npcs'
+  | 'droids'
+  | 'materials'
+  | 'races'
+  | 'weapons'
+  | 'planets'
+  | 'terrain'
+  | 'creatures'
+  | 'factionmodules';
+
+export interface ListTypesClassesOptions<T extends TypesEntityType = TypesEntityType> {
+  entityType: T;
+  start_index?: number;
+  item_count?: number;
+}
+
+export interface ListTypesEntitiesOptions<T extends TypesEntityType = TypesEntityType> {
+  entityType: T;
+  class?: string;
+  start_index?: number;
+  item_count?: number;
+}
+
+export interface GetTypesEntityOptions<T extends TypesEntityType = TypesEntityType> {
+  entityType: T;
+  uid: string;
+}
+
+/**
+ * Summary row returned by /types/:entityType list endpoints.
+ */
+export interface TypesEntityListItem {
+  attributes: {
+    uid: string;
+    href: string;
+    [key: string]: unknown;
+  };
+  value: string;
+  [key: string]: unknown;
+}
+
+/**
+ * Pagination attributes returned by /types/:entityType list endpoints.
+ */
+export interface TypesEntityListAttributes {
+  start?: number;
+  total?: number;
+  count?: number;
+  [key: string]: unknown;
+}
+
+/**
+ * Generic wrapped response returned by /types/:entityType list endpoints.
+ * Example: { attributes: {...}, vehicletype: [...] }
+ */
+export interface TypesEntitiesListRawResponse {
+  attributes?: TypesEntityListAttributes;
+  [key: string]: unknown;
+}
+
+/**
+ * Wrapped ships list response returned by /types/ships.
+ * Example: { attributes: {...}, shiptype: [...] }
+ */
+export interface TypesShipsListRawResponse extends TypesEntitiesListRawResponse {
+  shiptype?: TypesEntityListItem[];
+}
+
+/**
+ * Normalized /types/:entityType list response with pagination metadata and items.
+ */
+export interface TypesEntitiesListMetaResponse {
+  attributes?: TypesEntityListAttributes;
+  items: TypesEntityListItem[];
+}
+
+/**
+ * Fallback response shape for non-ship /types/:entityType/:uid endpoints.
+ */
+export interface TypesEntityGenericDetail {
+  uid: string;
+  name?: string;
+  [key: string]: unknown;
+}
+
+export type TypesShipBoolean = 'yes' | 'no';
+
+export interface TypesShipClass {
+  attributes: {
+    uid: string;
+    value?: string;
+    href?: string;
+    [key: string]: unknown;
+  };
+}
+
+export interface TypesShipValueWithUnits {
+  value: number | string;
+  attributes?: {
+    units?: string;
+    [key: string]: unknown;
+  };
+  [key: string]: unknown;
+}
+
+export interface TypesShipSpeed {
+  hyperspace?: number | string;
+  sublight?: TypesShipValueWithUnits;
+  planetary?: TypesShipValueWithUnits;
+  [key: string]: unknown;
+}
+
+export interface TypesShipWeapon {
+  attributes: {
+    uid: string;
+    href?: string;
+    quantity?: number;
+    arc?: string;
+    arcFrom?: number;
+    arcTo?: number;
+    [key: string]: unknown;
+  };
+  value: string;
+}
+
+export interface TypesShipWeapons {
+  weapon?: TypesShipWeapon[];
+  [key: string]: unknown;
+}
+
+export interface TypesShipMaterial {
+  attributes: {
+    uid: string;
+    href?: string;
+    quantity?: number;
+    [key: string]: unknown;
+  };
+  value: string;
+}
+
+export interface TypesShipMaterials {
+  material?: TypesShipMaterial[];
+  [key: string]: unknown;
+}
+
+export interface TypesShipPrice {
+  credits?: number | string;
+  [key: string]: unknown;
+}
+
+export interface TypesShipProduction {
+  modifier?: number | string;
+  recommendedWorkers?: number;
+  recyclingXP?: number | string;
+  genericSlots?: number;
+  [key: string]: unknown;
+}
+
+export interface TypesShipImages {
+  small?: string;
+  large?: string;
+  [key: string]: unknown;
+}
+
+/**
+ * Detailed /types/ships/:uid response shape.
+ * Fields are optional where the API may return variant payloads.
+ */
+export interface TypesShipEntity {
+  uid: string;
+  name: string;
+  description?: string;
+  class?: TypesShipClass;
+  speed?: TypesShipSpeed;
+  manoeuvrability?: number;
+  sensors?: number;
+  ecm?: number;
+  weight?: TypesShipValueWithUnits;
+  volume?: TypesShipValueWithUnits;
+  weightcapacity?: TypesShipValueWithUnits;
+  volumecapacity?: TypesShipValueWithUnits;
+  maxpassengers?: number;
+  escapepods?: number;
+  length?: TypesShipValueWithUnits;
+  hull?: number;
+  shield?: number;
+  armour?: number;
+  ioniccapacity?: number;
+  repulsors?: TypesShipBoolean;
+  slotsize?: number;
+  medicalrooms?: number;
+  asteroidprospectingsensors?: number;
+  asteroidminingpower?: number;
+  hangarbay?: TypesShipBoolean;
+  dockingbay?: TypesShipBoolean;
+  canrecycle?: TypesShipBoolean;
+  caninterdict?: TypesShipBoolean;
+  weapons?: TypesShipWeapons;
+  materials?: TypesShipMaterials;
+  price?: TypesShipPrice;
+  production?: TypesShipProduction;
+  images?: TypesShipImages;
+  [key: string]: unknown;
+}
+
+/**
+ * Detailed /types/vehicles/:uid response shape.
+ * Fields are optional where the API may return variant payloads.
+ */
+export interface TypesVehicleEntity {
+  uid: string;
+  name: string;
+  description?: string;
+  class?: TypesShipClass;
+  speed?: TypesShipSpeed;
+  manoeuvrability?: number;
+  sensors?: number;
+  ecm?: number;
+  weight?: TypesShipValueWithUnits;
+  volume?: TypesShipValueWithUnits;
+  weightcapacity?: TypesShipValueWithUnits;
+  volumecapacity?: TypesShipValueWithUnits;
+  maxpassengers?: number;
+  escapepods?: number;
+  length?: TypesShipValueWithUnits;
+  hull?: number;
+  shield?: number;
+  ioniccapacity?: number;
+  repulsors?: TypesShipBoolean;
+  slotsize?: number;
+  medicalrooms?: number;
+  hangarbay?: TypesShipBoolean;
+  dockingbay?: TypesShipBoolean;
+  canrecycle?: TypesShipBoolean;
+  terrainrestrictions?: TypesCreatureTerrainRestrictions;
+  weapons?: TypesShipWeapons | Record<string, never>;
+  materials?: TypesShipMaterials | Record<string, never>;
+  price?: TypesShipPrice;
+  production?: TypesShipProduction;
+  images?: TypesShipImages;
+  [key: string]: unknown;
+}
+
+export interface TypesCreatureClass {
+  attributes: {
+    uid: string;
+    value?: string;
+    href?: string;
+    [key: string]: unknown;
+  };
+}
+
+export interface TypesCreatureTerrainTypeRef {
+  attributes: {
+    uid: string;
+    code?: string;
+    href?: string;
+    [key: string]: unknown;
+  };
+  value: string;
+  [key: string]: unknown;
+}
+
+export interface TypesCreatureSpawnTerrainTypes {
+  spawnterraintype?: TypesCreatureTerrainTypeRef[];
+  [key: string]: unknown;
+}
+
+export interface TypesCreatureTerrainRestrictions {
+  terrainrestriction?: TypesCreatureTerrainTypeRef[];
+  [key: string]: unknown;
+}
+
+export interface TypesCreatureTerrainCollections {
+  spawnterraintypes?: TypesCreatureSpawnTerrainTypes;
+  terrainrestrictions?: TypesCreatureTerrainRestrictions;
+}
+
+export interface TypesCreatureSkillEntry {
+  attributes?: {
+    type?: string;
+    [key: string]: unknown;
+  };
+  value: number | string;
+  [key: string]: unknown;
+}
+
+export interface TypesCreatureSkillBucket {
+  attributes?: {
+    force?: string;
+    count?: number;
+    [key: string]: unknown;
+  };
+  skill?: TypesCreatureSkillEntry[];
+  [key: string]: unknown;
+}
+
+export interface TypesCreatureSkills {
+  general?: TypesCreatureSkillBucket[];
+  space?: TypesCreatureSkillBucket[];
+  ground?: TypesCreatureSkillBucket[];
+  social?: TypesCreatureSkillBucket[];
+  science?: TypesCreatureSkillBucket[];
+  [key: string]: unknown;
+}
+
+export interface TypesCreatureImages {
+  small?: string;
+  large?: string;
+  [key: string]: unknown;
+}
+
+/**
+ * Detailed /types/creatures/:uid response shape.
+ * Fields are optional where the API may return variant payloads.
+ */
+export interface TypesCreatureEntity extends TypesCreatureTerrainCollections {
+  uid: string;
+  name: string;
+  description?: string;
+  class?: TypesCreatureClass;
+  slotsize?: number;
+  species?: string;
+  basehp?: number;
+  weight?: TypesShipValueWithUnits;
+  volume?: TypesShipValueWithUnits;
+  homeworld?: Record<string, unknown>;
+  skills?: TypesCreatureSkills;
+  images?: TypesCreatureImages;
+  [key: string]: unknown;
+}
+
+export interface TypesFactionModuleFacilityDatacards {
+  facility?: TypesEntityListItem[];
+  [key: string]: unknown;
+}
+
+export interface TypesFactionModuleShipDatacards {
+  ship?: TypesEntityListItem[];
+  [key: string]: unknown;
+}
+
+export interface TypesFactionModuleVehicleDatacards {
+  vehicle?: TypesEntityListItem[];
+  [key: string]: unknown;
+}
+
+export interface TypesFactionModuleDroidDatacards {
+  droid?: TypesEntityListItem[];
+  [key: string]: unknown;
+}
+
+export interface TypesFactionModuleItemDatacards {
+  item?: TypesEntityListItem[];
+  [key: string]: unknown;
+}
+
+export interface TypesFactionModuleWeaponDatacards {
+  weapon?: TypesEntityListItem[];
+  [key: string]: unknown;
+}
+
+export interface TypesFactionModuleStationDatacards {
+  station?: TypesEntityListItem[];
+  [key: string]: unknown;
+}
+
+export interface TypesFactionModuleDatacards {
+  facilities?: TypesFactionModuleFacilityDatacards | Record<string, never>;
+  ships?: TypesFactionModuleShipDatacards | Record<string, never>;
+  vehicles?: TypesFactionModuleVehicleDatacards | Record<string, never>;
+  droids?: TypesFactionModuleDroidDatacards | Record<string, never>;
+  items?: TypesFactionModuleItemDatacards | Record<string, never>;
+  weapons?: TypesFactionModuleWeaponDatacards | Record<string, never>;
+  stations?: TypesFactionModuleStationDatacards | Record<string, never>;
+  [key: string]: unknown;
+}
+
+/**
+ * Detailed /types/faction%20modules/:uid response shape.
+ * Fields are optional where the API may return variant payloads.
+ */
+export interface TypesFactionModuleEntity {
+  uid: string;
+  name: string;
+  description?: string;
+  stackable?: boolean;
+  membercost?: number | string;
+  membercostcumulative?: boolean;
+  creditcost?: number | string;
+  minimumcapital?: number | string;
+  datacards?: TypesFactionModuleDatacards;
+  [key: string]: unknown;
+}
+
+export interface TypesTerrainMaterialType {
+  attributes: {
+    uid: string;
+    code?: string;
+    href?: string;
+    [key: string]: unknown;
+  };
+  value: string;
+  [key: string]: unknown;
+}
+
+export interface TypesTerrainMaterialTypes {
+  materialtype?: TypesTerrainMaterialType[];
+  [key: string]: unknown;
+}
+
+export interface TypesTerrainImages {
+  small?: string;
+  large?: string;
+  [key: string]: unknown;
+}
+
+/**
+ * Detailed /types/terrain/:uid response shape.
+ * Fields are optional where the API may return variant payloads.
+ */
+export interface TypesTerrainEntity {
+  uid: string;
+  name: string;
+  code?: string;
+  materialprobabilitypercent?: number | string;
+  materialtypes?: TypesTerrainMaterialTypes | Record<string, never>;
+  images?: TypesTerrainImages;
+  [key: string]: unknown;
+}
+
+export interface TypesPlanetLargeImages {
+  large?: string[];
+  [key: string]: unknown;
+}
+
+export interface TypesPlanetTypeImages {
+  small?: string;
+  atmosphere?: string;
+  stratosphere?: string;
+  loworbit?: string;
+  larges?: TypesPlanetLargeImages;
+  [key: string]: unknown;
+}
+
+/**
+ * Detailed /types/planets/:uid response shape.
+ * Fields are optional where the API may return variant payloads.
+ */
+export interface TypesPlanetEntity {
+  uid: string;
+  name: string;
+  images?: TypesPlanetTypeImages;
+  [key: string]: unknown;
+}
+
+export interface TypesWeaponClass {
+  attributes: {
+    uid: string;
+    value?: string;
+    href?: string;
+    [key: string]: unknown;
+  };
+}
+
+export interface TypesWeaponImages {
+  button?: string;
+  small?: string;
+  large?: string;
+  [key: string]: unknown;
+}
+
+/**
+ * Detailed /types/weapons/:uid response shape.
+ * Fields are optional where the API may return variant payloads.
+ */
+export interface TypesWeaponEntity {
+  uid: string;
+  name: string;
+  class?: TypesWeaponClass;
+  damagetype?: string;
+  mindamage?: number;
+  maxdamage?: number;
+  optimumrange?: number;
+  maxhits?: number;
+  dropOff?: number;
+  firepower?: number;
+  tracking?: number;
+  poison?: boolean;
+  dual?: boolean;
+  images?: TypesWeaponImages;
+  [key: string]: unknown;
+}
+
+export interface TypesRaceHomeworld {
+  attributes?: {
+    uid?: string;
+    name?: string;
+    href?: string;
+    [key: string]: unknown;
+  };
+  [key: string]: unknown;
+}
+
+export interface TypesRaceGenderImages {
+  image?: string[];
+  [key: string]: unknown;
+}
+
+export interface TypesRaceImages {
+  female?: TypesRaceGenderImages;
+  male?: TypesRaceGenderImages;
+  [key: string]: unknown;
+}
+
+/**
+ * Detailed /types/races/:uid response shape.
+ * Fields are optional where the API may return variant payloads.
+ */
+export interface TypesRaceEntity {
+  uid: string;
+  name: string;
+  description?: string;
+  forceprobability?: number;
+  hpbonus?: number;
+  hpmultiplier?: number | string;
+  homeworld?: TypesRaceHomeworld | Record<string, never>;
+  skills?: TypesCreatureSkills;
+  terrainrestrictions?: TypesCreatureTerrainRestrictions;
+  images?: TypesRaceImages;
+  [key: string]: unknown;
+}
+
+export interface TypesMaterialPrice {
+  credits?: number | string;
+  [key: string]: unknown;
+}
+
+export interface TypesMaterialImages {
+  small?: string;
+  large?: string;
+  deposit?: string;
+  [key: string]: unknown;
+}
+
+/**
+ * Detailed /types/materials/:uid response shape.
+ * Fields are optional where the API may return variant payloads.
+ */
+export interface TypesMaterialEntity {
+  uid: string;
+  name: string;
+  description?: string;
+  weight?: TypesShipValueWithUnits;
+  volume?: TypesShipValueWithUnits;
+  rarity?: number;
+  price?: TypesMaterialPrice;
+  images?: TypesMaterialImages;
+  [key: string]: unknown;
+}
+
+export interface TypesDroidClass {
+  attributes: {
+    uid: string;
+    value?: string;
+    href?: string;
+    [key: string]: unknown;
+  };
+}
+
+/**
+ * Detailed /types/droids/:uid response shape.
+ * Fields are optional where the API may return variant payloads.
+ */
+export interface TypesDroidEntity {
+  uid: string;
+  name: string;
+  description?: string;
+  class?: TypesDroidClass;
+  sensors?: number;
+  ecm?: number;
+  batchquantity?: number;
+  weight?: TypesShipValueWithUnits;
+  volume?: TypesShipValueWithUnits;
+  weightcapacity?: TypesShipValueWithUnits;
+  volumecapacity?: TypesShipValueWithUnits;
+  hull?: number;
+  shield?: number;
+  ioniccapacity?: number;
+  armour?: number;
+  slotsize?: number;
+  terrainrestrictions?: TypesCreatureTerrainRestrictions;
+  skills?: TypesCreatureSkills;
+  weapons?: TypesShipWeapons | Record<string, never>;
+  materials?: TypesShipMaterials | Record<string, never>;
+  price?: TypesShipPrice;
+  production?: TypesShipProduction;
+  images?: TypesShipImages;
+  [key: string]: unknown;
+}
+
+export interface TypesNpcClass {
+  attributes: {
+    uid: string;
+    value?: string;
+    href?: string;
+    [key: string]: unknown;
+  };
+}
+
+export interface TypesNpcPrice {
+  credits?: number | string;
+  [key: string]: unknown;
+}
+
+export interface TypesNpcHiringLocations {
+  hiringlocation?: TypesEntityListItem[];
+  [key: string]: unknown;
+}
+
+export interface TypesNpcImages {
+  type?: string;
+  [key: string]: unknown;
+}
+
+/**
+ * Detailed /types/npcs/:uid response shape.
+ * Fields are optional where the API may return variant payloads.
+ */
+export interface TypesNpcEntity {
+  uid: string;
+  name: string;
+  description?: string;
+  class?: TypesNpcClass;
+  price?: TypesNpcPrice;
+  hiringlocations?: TypesNpcHiringLocations | Record<string, never>;
+  skills?: TypesCreatureSkills;
+  images?: TypesNpcImages;
+  [key: string]: unknown;
+}
+
+export interface TypesItemClass {
+  attributes: {
+    uid: string;
+    value?: string;
+    href?: string;
+    [key: string]: unknown;
+  };
+}
+
+export interface TypesItemEquippableSlots {
+  equippableslot?: string[];
+  [key: string]: unknown;
+}
+
+/**
+ * Detailed /types/items/:uid response shape.
+ * Fields are optional where the API may return variant payloads.
+ */
+export interface TypesItemEntity {
+  uid: string;
+  name: string;
+  description?: string;
+  class?: TypesItemClass;
+  maxuses?: number;
+  lockable?: TypesShipBoolean;
+  batchquantity?: number;
+  weight?: TypesShipValueWithUnits;
+  volume?: TypesShipValueWithUnits;
+  weightcapacity?: TypesShipValueWithUnits;
+  volumecapacity?: TypesShipValueWithUnits;
+  equippableslots?: TypesItemEquippableSlots;
+  weapons?: TypesShipWeapons | Record<string, never>;
+  materials?: TypesShipMaterials | Record<string, never>;
+  price?: TypesShipPrice;
+  production?: TypesShipProduction;
+  images?: TypesShipImages;
+  [key: string]: unknown;
+}
+
+export interface TypesFacilityClass {
+  attributes: {
+    uid: string;
+    value?: string;
+    href?: string;
+    [key: string]: unknown;
+  };
+}
+
+export interface TypesFacilityImageSet {
+  small?: string;
+  largevertical?: string;
+  largehorizontal?: string;
+  [key: string]: unknown;
+}
+
+export interface TypesFacilityImageSets {
+  images?: TypesFacilityImageSet[];
+  [key: string]: unknown;
+}
+
+/**
+ * Detailed /types/facilities/:uid response shape.
+ * Fields are optional where the API may return variant payloads.
+ */
+export interface TypesFacilityEntity {
+  uid: string;
+  name: string;
+  description?: string;
+  class?: TypesFacilityClass;
+  sensors?: number;
+  weight?: TypesShipValueWithUnits;
+  volume?: TypesShipValueWithUnits;
+  volumecapacity?: TypesShipValueWithUnits;
+  maxpassengers?: number;
+  flats?: number;
+  jobs?: number;
+  sizex?: number;
+  sizey?: number;
+  hull?: number;
+  shield?: number;
+  ioniccapacity?: number;
+  energy?: number;
+  canloadmaterials?: boolean;
+  canearnincome?: boolean;
+  medicalrooms?: number;
+  hangarbay?: TypesShipBoolean;
+  dockingbay?: TypesShipBoolean;
+  canrecycle?: TypesShipBoolean;
+  canproduce?: TypesShipBoolean;
+  canmine?: TypesShipBoolean;
+  canrefinealazhi?: TypesShipBoolean;
+  canfarmalazhi?: TypesShipBoolean;
+  canresearch?: TypesShipBoolean;
+  weapons?: TypesShipWeapons | Record<string, never>;
+  materials?: TypesShipMaterials | Record<string, never>;
+  price?: TypesShipPrice;
+  production?: TypesShipProduction;
+  imagesets?: TypesFacilityImageSets;
+  [key: string]: unknown;
+}
+
+export interface TypesStationGarrison {
+  maxSlots?: number;
+  maxSquads?: number;
+  loiterTime?: number;
+  rearmTime?: number;
+  garrisonType?: string;
+  [key: string]: unknown;
+}
+
+export interface TypesStationGarrisons {
+  garrison?: TypesStationGarrison[];
+  [key: string]: unknown;
+}
+
+/**
+ * Detailed /types/stations/:uid response shape.
+ * Fields are optional where the API may return variant payloads.
+ */
+export interface TypesStationEntity {
+  uid: string;
+  name: string;
+  description?: string;
+  sensors?: number;
+  ecm?: number;
+  weight?: TypesShipValueWithUnits;
+  volume?: TypesShipValueWithUnits;
+  weightcapacity?: TypesShipValueWithUnits;
+  volumecapacity?: TypesShipValueWithUnits;
+  maxpassengers?: number;
+  escapepods?: number;
+  garrisons?: TypesStationGarrisons | Record<string, never>;
+  length?: TypesShipValueWithUnits;
+  hull?: number;
+  shield?: number;
+  ioniccapacity?: number;
+  medicalrooms?: number;
+  hangarbay?: TypesShipBoolean;
+  dockingbay?: TypesShipBoolean;
+  canrecycle?: TypesShipBoolean;
+  canproduce?: TypesShipBoolean;
+  isasteroidminingdepot?: TypesShipBoolean;
+  canrefinealazhi?: TypesShipBoolean;
+  caninterdict?: TypesShipBoolean;
+  canresearch?: TypesShipBoolean;
+  weapons?: TypesShipWeapons | Record<string, never>;
+  materials?: TypesShipMaterials | Record<string, never>;
+  price?: TypesShipPrice;
+  production?: TypesShipProduction;
+  images?: TypesShipImages;
+  [key: string]: unknown;
+}
+
+export interface TypesEntityGetResponseMap {
+  ships: TypesShipEntity;
+  vehicles: TypesVehicleEntity;
+  stations: TypesStationEntity;
+  facilities: TypesFacilityEntity;
+  items: TypesItemEntity;
+  npcs: TypesNpcEntity;
+  droids: TypesDroidEntity;
+  materials: TypesMaterialEntity;
+  races: TypesRaceEntity;
+  weapons: TypesWeaponEntity;
+  planets: TypesPlanetEntity;
+  terrain: TypesTerrainEntity;
+  creatures: TypesCreatureEntity;
+  factionmodules: TypesFactionModuleEntity;
+}
+
+// ============================================================================
 // Request Options Types
 // ============================================================================
 
@@ -1241,13 +2068,13 @@ export interface ListGNSOptions extends ListNewsOptionsBase {
  * SimNews listing options
  * Uses only base options (no faction filtering)
  */
-export interface ListSimNewsOptions extends ListNewsOptionsBase { }
+export interface ListSimNewsOptions extends ListNewsOptionsBase {}
 
 /**
  * @deprecated Use ListGNSOptions or ListSimNewsOptions instead.
  * This combined type is kept for backwards compatibility.
  */
-export interface ListNewsOptions extends ListGNSOptions { }
+export interface ListNewsOptions extends ListGNSOptions {}
 
 export interface GetEntityOptions {
   entityType: string;
