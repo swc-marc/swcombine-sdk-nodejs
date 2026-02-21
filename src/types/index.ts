@@ -2044,7 +2044,10 @@ export interface DeleteMessageOptions {
 
 export interface CreateMessageOptions {
   uid: string;
-  /** Semicolon-separated list of recipient character names/UIDs (max 25) */
+  /**
+   * Semicolon-separated list of recipient character handles (max 25).
+   * Example: 'handle1;handle2'
+   */
   receivers: string;
   /** Message text content */
   communication: string;

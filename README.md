@@ -104,6 +104,14 @@ if (firstMessageId) {
   console.log(fullMessage.communication);
 }
 
+// Send a message
+// IMPORTANT: use receiver handle(s), not UID(s), for `receivers`
+await authenticatedClient.character.messages.create({
+  uid: '1:12345',
+  receivers: 'recipient_handle',
+  communication: 'Test message',
+});
+
 // Get faction information
 const faction = await authenticatedClient.faction.get({
   uid: '20:123',
@@ -287,6 +295,13 @@ if (messageId) {
   });
   console.log(messageDetail.communication);
 }
+
+// Send message: receivers must be handle(s), not UID(s)
+await client.character.messages.create({
+  uid: '1:12345',
+  receivers: 'recipient_handle_1;recipient_handle_2',
+  communication: 'Hello there',
+});
 ```
 
 ## Configuration Options

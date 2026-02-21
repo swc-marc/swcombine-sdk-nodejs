@@ -695,13 +695,23 @@ Send a message
 
 Message response typed as `Message`
 
-#### Example
+#### Examples
 
 ```ts
+// Valid: handles
 await client.character.messages.create({
   uid: '1:12345',
-  receivers: 'recipient1;recipient2',
+  receivers: 'recipient_handle_1;recipient_handle_2',
   communication: 'Hello from the SDK!'
+});
+```
+
+```ts
+// Invalid: UIDs are rejected by the API and pre-validated by this SDK
+await client.character.messages.create({
+  uid: '1:12345',
+  receivers: '1:12345',
+  communication: 'Test'
 });
 ```
 
