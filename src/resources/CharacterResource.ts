@@ -8,6 +8,7 @@ import {
   Character,
   CharacterMe,
   Message,
+  MessageListItem,
   CreditLogEntry,
   GetCharacterOptions,
   GetCharacterByHandleOptions,
@@ -34,6 +35,10 @@ import {
 export class CharacterMessagesResource extends BaseResource {
   /**
    * List messages sent or received by character (paginated)
+   *
+   * Note: list responses return `MessageListItem[]` metadata objects and do not
+   * guarantee a `communication` field. Use `get()` for full message content.
+   *
    * @requires_auth Yes
    * @requires_scope MESSAGES_READ
    * @param options - Character UID, optional message mode, and optional pagination parameters
@@ -41,12 +46,19 @@ export class CharacterMessagesResource extends BaseResource {
    * @param options.mode - 'sent' or 'received'. If omitted, returns both sent and received messages.
    * @param options.start_index - Starting position (1-based). Default: 1
    * @param options.item_count - Number of items to retrieve. Default: 50, Max: 50
+   * @returns Array of message metadata items (`MessageListItem[]`)
    * @example
    * const allMessages = await client.character.messages.list({ uid: '1:12345' });
    * const received = await client.character.messages.list({ uid: '1:12345', mode: 'received' });
    * const moreMessages = await client.character.messages.list({ uid: '1:12345', mode: 'received', start_index: 51, item_count: 50 });
+   *
+   * const firstMessageId = received[0]?.attributes.uid;
+   * if (firstMessageId) {
+   *   const detail = await client.character.messages.get({ uid: '1:12345', messageId: firstMessageId });
+   *   console.log(detail.communication);
+   * }
    */
-  async list(options: ListMessagesOptions): Promise<Message[]> {
+  async list(options: ListMessagesOptions): Promise<MessageListItem[]> {
     const params: Record<string, number> = {
       start_index: options.start_index || 1,
       item_count: options.item_count || 50,
@@ -55,7 +67,10 @@ export class CharacterMessagesResource extends BaseResource {
     const path = options.mode
       ? `/character/${options.uid}/messages/${options.mode}`
       : `/character/${options.uid}/messages`;
-    const response = await this.http.get<{ message?: Message[]; attributes?: unknown }>(path, { params });
+    const response = await this.http.get<{ message?: MessageListItem[]; attributes?: unknown }>(
+      path,
+      { params }
+    );
     // API returns { attributes: {...}, message: [...] }, extract just the array
     return response.message || [];
   }
@@ -64,6 +79,18 @@ export class CharacterMessagesResource extends BaseResource {
    * Get a specific message
    * @requires_auth Yes
    * @requires_scope MESSAGES_READ
+   * @param options - Character UID and message UID
+   * @param options.uid - Character UID
+   * @param options.messageId - Message UID (for example from `list()[i].attributes.uid`)
+   * @returns Full message details including `communication`
+   * @example
+   * const messages = await client.character.messages.list({ uid: '1:12345', mode: 'received' });
+   * const messageId = messages[0]?.attributes.uid;
+   *
+   * if (messageId) {
+   *   const message = await client.character.messages.get({ uid: '1:12345', messageId });
+   *   console.log(message.communication);
+   * }
    */
   async get(options: GetMessageOptions): Promise<Message> {
     return this.request<Message>('GET', `/character/${options.uid}/messages/${options.messageId}`);
@@ -85,6 +112,7 @@ export class CharacterMessagesResource extends BaseResource {
    * @param options.uid - Character UID sending the message
    * @param options.receivers - Semicolon-separated list of recipient names/UIDs (max 25)
    * @param options.communication - Message text content
+   * @returns Message response typed as `Message`
    * @example
    * await client.character.messages.create({
    *   uid: '1:12345',

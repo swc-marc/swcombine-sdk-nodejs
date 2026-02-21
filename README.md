@@ -94,6 +94,16 @@ const messages = await authenticatedClient.character.messages.list({
   mode: 'received',
 });
 
+// List returns metadata items (MessageListItem[])
+const firstMessageId = messages[0]?.attributes.uid;
+if (firstMessageId) {
+  const fullMessage = await authenticatedClient.character.messages.get({
+    uid: '1:12345',
+    messageId: firstMessageId,
+  });
+  console.log(fullMessage.communication);
+}
+
 // Get faction information
 const faction = await authenticatedClient.faction.get({
   uid: '20:123',
@@ -254,16 +264,29 @@ try {
 Full TypeScript support with intelligent type inference:
 
 ```typescript
+import { Message, MessageListItem } from 'swcombine-sdk';
+
 // Types are automatically inferred
 const character = await client.character.get({ uid: '1:12345' });
 // character: Character
 
 // Request parameters are typed
-await client.character.messages.list({
+const listedMessages = await client.character.messages.list({
   uid: '1:12345',
   mode: 'received', // Optional - TypeScript knows valid values: 'sent' | 'received'
   // mode: 'invalid', // TypeScript error
 });
+
+const messageListItem: MessageListItem | undefined = listedMessages[0];
+const messageId = messageListItem?.attributes.uid;
+
+if (messageId) {
+  const messageDetail: Message = await client.character.messages.get({
+    uid: '1:12345',
+    messageId,
+  });
+  console.log(messageDetail.communication);
+}
 ```
 
 ## Configuration Options
